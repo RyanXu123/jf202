@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+    <link rel="shortcut icon" href="#"/>
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+</head>
+<body>
+here
+<div id="test">
+test
+</div>
+<script>
+    $(document).ready(function() {
+        $.ajax({
+            url : "/getData/202/ktall",//后台请求的数据，用的是PHP
+            dataType : "json",//数据格式
+            type : "post",//请求方式
+            async : false,//是否异步请求
+            success : function(data1) {   //如果请求成功，返回数据。
+                var html = "";
+                for(var i=0;i<10;i++){    //遍历data数组
+                    var ls = data1[i];
+                    html +="<span> 测试：i</span>";
+                }
+                console.log("sm");
+                console.log("%s",data1[0].time);
+                $("#test").html(html); //在html页面id=test的标签里显示html内容
+            },
+        })
+    })
+</script>
+</body>
+</html>
