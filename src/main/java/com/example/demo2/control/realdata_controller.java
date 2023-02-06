@@ -160,66 +160,149 @@ public class realdata_controller {
         String sql2="select * from realdata_once where Location='JF202' and Equipment='服务器' and SiteName='X1-下' ";
         List list_value= new ArrayList<>();
         Integer server_num=1;
-        List list_risk= new ArrayList<>();
+        List list_datavalue= new ArrayList<>();
         List list_name= new ArrayList<>();
 
         List <Map<String,Object>> list1= new ArrayList<>();
         List <Map<String,Object>> list2= new ArrayList<>();
-        Map<String, Object> server_temp = new HashMap<String, Object>();  //服务器
+        List <Map<String,Object>> list3= new ArrayList<>();
+        List <Map<String,Object>> list4= new ArrayList<>();
+        Map<String, Object> server_temp = new HashMap<String, Object>();  //服务器冷通道
+        Map<String, Object> server_temp1 = new HashMap<String, Object>();  //服务器热通道
+        Map<String, Object> server_temp2 = new HashMap<String, Object>();  //服务器功率
+
         for (String c:server){  //遍历服务器
             String sql_temp1=sql1.replace("'服务器'","'服务器"+c+"'");
             String sql_temp2=sql2.replace("'服务器'","'服务器"+c+"'");
 
+
             Map<Integer, Object> server_site1 =new HashMap<Integer, Object>();  //服务器测点
             Map<Integer, Object> server_site2 =new HashMap<Integer, Object>();  //服务器测点
+            Map<Integer, Object> server_site3 =new HashMap<Integer, Object>();  //服务器测点热通道
 
             Map<String, Object> server_site =new HashMap<String, Object>();  //服务器测点
-            for(Integer i=1;i<=23;i++){ //遍历测点
-                String sql_temp11=sql_temp1.replace("'X1","'"+c+i.toString());    //新建变量，否则只能替换第一次，后面X1变成A1
-                String sql_temp22=sql_temp2.replace("'X1","'"+c+i.toString());
-                list1=jdbc.queryForList(sql_temp11);
-                list2=jdbc.queryForList(sql_temp22);
+            Integer siteNum=23;
+            Double temperature1=0.0;
+            Double temperature2=0.0;
+            Double temperature3=0.0;
 
-                String riskStr = new String();
+            //遍历并修改测点
+            Integer cntNull1=0;//每组服务器置零
+            Integer cntNull2=0;
+            Integer cntNull3=0;
+            for(Integer i=1;i<=siteNum;i++){ //遍历测点
+                String sql_temp11=sql_temp1.replace("'X1","'"+c+i.toString());    //新建变量，否则只能替换第一次，后面X1变成A1
+                String sql_temp22=sql_temp2.replace("'X1","'"+c+i.toString());  //冷通道
+
+                String sql_temp33=sql_temp1.replace("X1-上",i.toString());           //热通道 ，上测点X1-上变为1
+//                String sql_temp44=sql_temp2.replace("X1-下",i.toString());
+
+                list1=jdbc.queryForList(sql_temp11);  //查询的每一条冷通道测点
+                list2=jdbc.queryForList(sql_temp22);
+                list3=jdbc.queryForList(sql_temp33);
+//                list4=jdbc.queryForList(sql_temp44);
+
+                String datavalueStr = new String();
                 String sitename = new String();
                 Integer num0 =0 ;
 
-                for (Map<String,Object> l:list1){
+//                temperature1=0.0;
+                for (Map<String,Object> l:list1){//冷测点取值,上
 
                     Object temp_value=l.get("Value0");
-                    Double risk=Double.parseDouble(temp_value.toString());
-                    riskStr = String.format("%.2f", risk);
-//                    list_risk.add(Double.valueOf(riskStr));
+                    Double datavalue=Double.parseDouble(temp_value.toString());
+                    datavalueStr = String.format("%.2f", datavalue);
+                    if (Double.parseDouble(datavalueStr)==0.0){ cntNull1=cntNull1+1;}//统计测点为0的个数
+                    temperature1+=Double.parseDouble(datavalueStr);//A所有上半测点求和求平均
+//                    list_datavalue.add(Double.valueOf(datavalueStr));
                     Object temp_name1=l.get("SiteName");
                     sitename=(temp_name1.toString());
                     int stop_point=sitename.indexOf('-');  //截取数字
                     String num=sitename.substring(1,stop_point);
                     num0= new Integer(num);
                 }
-                server_site1.put(num0,riskStr);
+//                server_site1_avg.put("Atop",temperature_all/siteNum)
+                server_site1.put(num0,datavalueStr);
 
 
-                for (Map<String,Object> l:list2){
+                for (Map<String,Object> l:list2){////测点取值,下
                     Object temp_value=l.get("Value0");
-                    Double risk=Double.parseDouble(temp_value.toString());
-                    riskStr = String.format("%.2f", risk);
-//                    list_risk.add(Double.valueOf(riskStr));
+                    Double datavalue=Double.parseDouble(temp_value.toString());
+                    datavalueStr = String.format("%.2f", datavalue);
+                    if (Double.parseDouble(datavalueStr)==0.0){ cntNull2=cntNull2+1;}
+//                    list_datavalue.add(Double.valueOf(datavalueStr));
+                    temperature2+=Double.parseDouble(datavalueStr);//A所有下半测点求和求平均
+
                     Object temp_value1=l.get("SiteName");
                     sitename=(temp_value1.toString());
                     int stop_point=sitename.indexOf('-');  //截取数字
                     String num=sitename.substring(1,stop_point);
                     num0= new Integer(num);
                 }
-                server_site2.put(num0,riskStr);
+                server_site2.put(num0,datavalueStr);
 //                list_data.addAll(list1);
 //                list_data.addAll(list2);
 //                data.put(sql_temp1,Arrays.asList(c,i));  //debugs
+
+
+
+
+                for (Map<String,Object> l:list3){//热测点取值所有测点
+
+                    Object temp_value=l.get("Value0");
+                    Double datavalue=Double.parseDouble(temp_value.toString());
+                    datavalueStr = String.format("%.2f", datavalue);
+                    if (Double.parseDouble(datavalueStr)==0.0){ cntNull3=cntNull3+1;}
+
+                    temperature3+=Double.parseDouble(datavalueStr);//A所有热通道求和求平均
+//                    list_datavalue.add(Double.valueOf(datavalueStr));
+                    Object temp_name1=l.get("SiteName");
+                    sitename=(temp_name1.toString());
+//                    int stop_point=sitename.indexOf('-');  //截取数字
+//                    String num=sitename.substring(1,stop_point);
+                    num0= new Integer(sitename);
+                }
+//                server_site1_avg.put("Atop",temperature_all/siteNum)
+                server_site3.put(num0,datavalueStr);
+
             }
-            TreeMap<Integer, Object> server_site11 = new TreeMap<>(server_site1);
-            TreeMap<Integer, Object> server_site22 = new TreeMap<>(server_site2);
-            server_site.put(c+"上",server_site11);
-            server_site.put(c+"下",server_site22);
-            server_temp.put(c,server_site);
+            temperature2=temperature2/(siteNum-cntNull1);
+            temperature1=temperature1/(siteNum-cntNull2);
+            temperature3=temperature3/(siteNum-cntNull3);
+            String t1 = String.format("%.2f", temperature1);
+            String t2 = String.format("%.2f", temperature2);
+            String t3 = String.format("%.2f", temperature3);
+
+
+            Map<String, Object> site_avg = new TreeMap<>();
+            Map<String, Object> site_avg1 = new TreeMap<>();//热通道平均
+            Map<String, Object> site_name = new TreeMap<>(); //冷通道
+            Map<String, Object> site_name1 = new TreeMap<>();//热通道
+            Map<String, Object> site_name2 = new TreeMap<>();//功率
+            TreeMap<String, Object> server_site0 = new TreeMap<>(server_site);
+            TreeMap<Integer, Object> server_site11 = new TreeMap<>(server_site1);//冷通道上
+            TreeMap<Integer, Object> server_site22 = new TreeMap<>(server_site2); //冷通道下
+            TreeMap<Integer, Object> server_site33 = new TreeMap<>(server_site3);//热通道
+//            TreeMap<String, Object> server_site11_avg = new TreeMap<>(server_site1_avg);
+//            TreeMap<String, Object> server_site22_avg = new TreeMap<>(server_site2_avg);  //测点排序
+
+            site_avg.put("upall",t1);//冷通道上
+            site_avg.put("downall",t2);//冷通道下
+            site_avg1.put("all",t3); ////热通道
+
+            server_site0.put("up",server_site11);
+            server_site0.put("down",server_site22);
+
+            site_name.put("avg",site_avg);
+            site_name.put("sitedetail",server_site0);
+
+            //热通道
+            site_name1.put("sitedetail",server_site33);
+            site_name1.put("avg",site_avg1);
+
+
+            server_temp.put(c,site_name);
+            server_temp1.put(c,site_name1);
 //            break;
 //            server_num+=1;
 //            data.put(sql_temp1,c);
@@ -229,9 +312,23 @@ public class realdata_controller {
 //        list1=jdbc.queryForList(sql_temp1);
 //        System.out.print(sql_temp1);
 //        list_data.add(data);
-//        data.put("risk",list_risk);
+//        data.put("datavalue",list_datavalue);
 //        data.put("sitename",list_name);
-        data.put("202",server_temp);
+        String sql_p="select * from realdata_once where Location='JF202' and PointName='服务器功率' ";
+        List <Map<String,Object>> list_p=jdbc.queryForList(sql_p);
+        List <Map<String,Object>>temp_p= new ArrayList<>();
+        TreeMap<String,Object> temp= new TreeMap<>();
+        for(Map<String,Object> p:list_p){
+            Object p_name=p.get("Equipment");
+            Object p_value=p.get("Value0");
+            temp.put(p_name.toString().substring(3),p_value);
+            temp_p.add(temp);
+        }
+//        server_temp2=temp_p;
+        data.put("servercold",server_temp);
+        data.put("serverhot",server_temp1);
+        data.put("serverpower",temp);
+
         list_data.add(data);
         return list_data;
     }
