@@ -1,4 +1,4 @@
-package com.example.demo2.control;
+package com.example.demo2.control_203;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,19 +18,19 @@ public class riskdata_controller {
     private JdbcTemplate jdbc;
 
     @CrossOrigin
-    @RequestMapping("/getData/202/riskdatanew")
+    @RequestMapping("/getData/203/riskdatanew")
     @ResponseBody
     @Scheduled(fixedRate = 30000)
-    public List<Map<String,Object>> getdata202_p(){
+    public List<Map<String,Object>> getdata203_p(){
 
         List <Map<String,Object>> list_data= new ArrayList<>();  //储存返回的json
         Map<String, Object> data = new HashMap<String, Object>();
 
         List<String> server = Arrays.asList("A","B","C","D","E","F","G","H","J","K","L","M","N","P");
-        String sql="select Value0 from realdata_once where Location='JF202' and Equipment='服务器A' and SiteName='A1-上' limit 0,1";
+        String sql="select Value0 from realdata_once where Location='JF203' and Equipment='服务器A' and SiteName='A1-上' limit 0,1";
 
-//        String sql1="select * from realdata_once where Location='JF202' and Equipment='服务器' and SiteName='X1-上' ";
-//        String sql2="select * from realdata_once where Location='JF202' and Equipment='服务器' and SiteName='X1-下' ";
+//        String sql1="select * from realdata_once where Location='JF203' and Equipment='服务器' and SiteName='X1-上' ";
+//        String sql2="select * from realdata_once where Location='JF203' and Equipment='服务器' and SiteName='X1-下' ";
 //        List list_value= new ArrayList<>();
 //        Integer server_num=1;
 //        List list_risk= new ArrayList<>();
@@ -91,8 +91,8 @@ public class riskdata_controller {
 //        }
 
 
-        String sql1="select * from realdata_once where Location='JF202' and Equipment='服务器' and SiteName='X1-上' ";
-        String sql2="select * from realdata_once where Location='JF202' and Equipment='服务器' and SiteName='X1-下' ";
+        String sql1="select * from realdata_once where Location='JF203' and Equipment='服务器' and SiteName='X1-上' ";
+        String sql2="select * from realdata_once where Location='JF203' and Equipment='服务器' and SiteName='X1-下' ";
         List list_value= new ArrayList<>();
         Integer server_num=1;
         List list_risk= new ArrayList<>();
@@ -171,26 +171,26 @@ public class riskdata_controller {
 //        list_data.add(data);
 //        data.put("risk",list_risk);
 //        data.put("sitename",list_name);
-        data.put("202",server_temp);
+        data.put("203",server_temp);
         list_data.add(data);
         return list_data;
     }
 
 
     @CrossOrigin
-    @RequestMapping("/getData/202/riskdata")
+    @RequestMapping("/getData/203/riskdata")
     @ResponseBody
     @Scheduled(fixedRate = 30000)
-    public List<Map<String,Object>> getdata202_p1(){
+    public List<Map<String,Object>> getdata203_p1(){
 
         List <Map<String,Object>> list_data= new ArrayList<>();  //储存返回的json
         Map<String, Object> data = new HashMap<String, Object>();
 
 //        List<String> server = Arrays.asList("A","B","C","D","E","F","G","H","J","K","L","M","N","P");
-        String sql="select * from riskdata where Location='JF202' ";
+        String sql="select * from riskdata where Location='JF203' ";
 
-//        String sql1="select * from realdata_once where Location='JF202' and Equipment='服务器' and SiteName='X1-上' ";
-//        String sql2="select * from realdata_once where Location='JF202' and Equipment='服务器' and SiteName='X1-下' ";
+//        String sql1="select * from realdata_once where Location='JF203' and Equipment='服务器' and SiteName='X1-上' ";
+//        String sql2="select * from realdata_once where Location='JF203' and Equipment='服务器' and SiteName='X1-下' ";
 //        List list_value= new ArrayList<>();
 //        Integer server_num=1;
 //        List list_risk= new ArrayList<>();

@@ -1,4 +1,5 @@
-package com.example.demo2.control;
+package com.example.demo2.control_202;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,17 +13,17 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-public class aipreparams_controller {
+public class aicmd_controller {
+
     @Autowired
     private JdbcTemplate jdbc;
 
-
     @CrossOrigin
-    @RequestMapping("/getData/202/aipreparams")
+    @RequestMapping("/getData/202/aicmd")
     @ResponseBody
     @Scheduled(fixedRate = 30000)
-    public List<Map<String,Object>> getdata202_ai(){
-        String sql="select * from aipreparams";
+    public List<Map<String,Object>> getdata202_aicmd(){
+        String sql="select * from aicmd";
         List <Map<String,Object>> list=jdbc.queryForList(sql);
         return list;
     }

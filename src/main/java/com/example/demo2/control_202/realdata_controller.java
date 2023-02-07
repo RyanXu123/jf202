@@ -1,8 +1,6 @@
-package com.example.demo2.control;
+package com.example.demo2.control_202;
 
 
-import com.sun.org.apache.bcel.internal.generic.NEW;
-import org.springframework.beans.factory.ListableBeanFactoryExtensionsKt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,8 +9,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.naming.ldap.SortKey;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Controller
