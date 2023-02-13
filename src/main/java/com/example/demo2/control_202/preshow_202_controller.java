@@ -13,11 +13,12 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Controller
-public class preshow_controller {
+public class preshow_202_controller {
 
 
     @Autowired
@@ -27,29 +28,32 @@ public class preshow_controller {
     @ResponseBody
     @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_pre1() {
-        String sql = "select * from predata where Location='JF202' limit 0,1360";
-        String sql1 = "select * from preshow where Location='JF202' limit 0,1360";
+        String sql = "select * from predata where Location='JF202' limit 0,13600";
+        String sql1 = "select * from preshow where Location='JF202' limit 0,13600";
         List<Map<String, Object>> list = jdbc.queryForList(sql);
         List<Map<String, Object>> list2 = jdbc.queryForList(sql1);
-        list.addAll((list2));
+//        Map<String,Object> ret=new HashMap<>();
+        list.addAll(list2);
+//        ret.put("realdata",list2);
+//        ret.put("predata",list);
         return list;
     }
-    @RequestMapping("/getData/202/preshow/realtime")
-    @ResponseBody
-    @Scheduled(fixedRate = 30000)
-    public List<Map<String,Object>> getdata202_real() {
-        String sql ="select * from predata where Location='JF202' limit 0,1360";
-        List<Map<String, Object>> list = jdbc.queryForList(sql);
-        return list;
-    }
-    @RequestMapping("/getData/202/preshow/pretime")
-    @ResponseBody
-    @Scheduled(fixedRate = 30000)
-    public List<Map<String,Object>> getdata202_pre() {
-        String sql = "select * from preshow where Location='JF202' limit 0,1360";
-        List<Map<String, Object>> list = jdbc.queryForList(sql);
-        return list;
-    }
+//    @RequestMapping("/getData/202/preshow/realtime")
+//    @ResponseBody
+//    @Scheduled(fixedRate = 30000)
+//    public List<Map<String,Object>> getdata202_real() {
+//        String sql ="select * from predata where Location='JF202' limit 0,1360";
+//        List<Map<String, Object>> list = jdbc.queryForList(sql);
+//        return list;
+//    }
+//    @RequestMapping("/getData/202/preshow/pretime")
+//    @ResponseBody
+//    @Scheduled(fixedRate = 30000)
+//    public List<Map<String,Object>> getdata202_pre() {
+//        String sql = "select * from preshow where Location='JF202' limit 0,1360";
+//        List<Map<String, Object>> list = jdbc.queryForList(sql);
+//        return list;
+//    }
     public class AllowOriginIntercepter implements HandlerInterceptor {
 
         @Override

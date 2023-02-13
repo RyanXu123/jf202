@@ -144,7 +144,7 @@ public class realdata_202_controller {
 
 
     @CrossOrigin
-    @RequestMapping("/getData/202/realdata/servernew")
+    @RequestMapping("/getData/202/realdata/servernew2")
     @ResponseBody
     @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_p(){
@@ -339,9 +339,251 @@ public class realdata_202_controller {
     }
 
 
+    @CrossOrigin
+    @RequestMapping("/getData/202/realdata/servernew")
+    @ResponseBody
+    @Scheduled(fixedRate = 30000)
+    public List<Map<String,Object>> getdata202_servernew2(){
+
+        List <Map<String,Object>> list_data= new ArrayList<>();  //储存返回的json
+        Map<String, Object> data = new HashMap<String, Object>();
+
+        List<String> server = Arrays.asList("A","B","C","D","E","F","G","H","J","K","L","M","N","P");
+        String sql="select Value0 from realdata_once where Location='JF202' and Equipment='服务器A' and SiteName='A1-上' limit 0,1";
+
+        String sql1="select * from realdata_once where Location='JF202' and Equipment='服务器'";
+
+        Map<String, Object> servers_cold= new TreeMap<>();  //所有列列服务器冷通道
+        Map<String, Object> servers_hot= new TreeMap<>();  //某列服务器冷通道
+        Map<String, Object> servers_power= new TreeMap<>();  //某列服务器冷通道
+        Integer siteNum=23;
 
 
 
+        Map<String, Object> server_temp_power = new TreeMap<>();  //某列服务器功率 放在服务器外面，包裹所有服务器
+        for (String c:server){  //遍历服务器 c为（"A","B","C","D" ...）
+
+//            List <Map<String,Object>> list1= new jdbc.queryForList(sql1);
+            Map<String, Object> server_temp_cold= new TreeMap<>();  //某列服务器冷通道
+            Map<String, Object> server_temp_hot = new TreeMap<>();  //某列服务器热通道
+
+            Integer cold_up_cnt_null=0;
+            Integer cold_down_cnt_null=0;
+            Integer hot_cnt_null=0;
+
+            double cold_up_sum=0.0;
+            double cold_down_sum=0.0;
+            double hot_sum=0.0;//某列服务器热通道测点温度求和
+
+            String sql_temp1=sql1.replace("'服务器'","'服务器"+c+"'"); //某服务器所有测点
+            List <Map<String,Object>> list1 =jdbc.queryForList(sql_temp1);
+            Map<Integer, Object> server_site_cold_up =new HashMap<Integer, Object>();  //某列服务器冷通道上测点
+            Map<Integer, Object> server_site_cold_down =new HashMap<Integer, Object>();  //某列服务器冷通道下测点
+            Map<Integer, Object> server_site_hot_all =new HashMap<Integer, Object>();  //某列服务器热通道测点
+            Integer cnt=0;
+            for(Map<String,Object>l:list1){
+                Double value0=(double) l.get("Value0");
+                if(cnt<siteNum*2){
+                    if(cnt%2!=0){//奇数下测点
+                        server_site_cold_down.put((cnt+2)/2,value0);//冷上 0 2 4 6 8
+                        if(value0<=0.0){
+                            cold_up_cnt_null++;
+                        }else{
+                            cold_up_sum+=value0;
+                        }
+                    }else{
+                        server_site_cold_up.put((cnt+1)/2,value0);//冷下 1 3 5 7
+                        if(value0<=0.0){
+                            cold_down_cnt_null++;
+                        }else{
+                            cold_down_sum+=value0;
+                        }
+                    }
+                }else if(cnt<69){
+                    server_site_hot_all.put(cnt+1-46,value0);//热 46 47 48 49
+                    if(value0<=0.0){
+                        hot_cnt_null++;
+                    }else{
+                        hot_sum+=value0;
+                    }
+                }else{ //69
+                    server_temp_power.put(c,value0);
+                }
+                cnt++;
+
+            }
+
+            Map<String, Object> server_site =new HashMap<String, Object>();  //服务器测点
+
+            cold_up_sum=cold_up_sum/(siteNum-cold_up_cnt_null);//某列服务冷通道上测点的总和除非0测点的个数，为某列服务器冷通道上测点平均
+            cold_down_sum=cold_down_sum/(siteNum-cold_down_cnt_null);//某列服务冷通道下测点的总和除非0测点的个数，为某列服务器冷通道下测点平均
+            hot_sum=hot_sum/(siteNum-hot_cnt_null);//某列服务热通道测点的总和除非0测点的个数，为某列服务器热通道测点平均
+
+            String t1 = String.format("%.2f", cold_up_sum);
+            String t2 = String.format("%.2f", cold_down_sum);
+            String t3 = String.format("%.2f", hot_sum); // 保留两位小数
+
+
+            Map<String, Object> site_avg_cold = new TreeMap<>();//某服务器冷通道平均
+            Map<String, Object> site_avg_hot = new TreeMap<>();//热通道平均
+            Map<String, Object> site_cold = new TreeMap<>(); //冷通道
+            Map<String, Object> site_hot = new TreeMap<>();//热通道
+            Map<String, Object> site_power = new TreeMap<>();//功率
+//            TreeMap<String, Object> server_site22_avg = new TreeMap<>(server_site2_avg);  //测点排序
+
+            site_avg_cold.put("upall",t1);//冷通道上，（upall，某列冷上平均）
+            site_avg_cold.put("downall",t2);//冷通道下 （downall，某列冷下平均）
+            site_avg_hot.put("all",t3); ////热通道  （all，某列热平均）
+
+            site_cold.put("up",server_site_cold_up); //某列服务器所有上测点  （up，{服务器所有测点（1，22）（2，22）..}）
+            site_cold.put("down",server_site_cold_down);//某列服务器所有下测点  （down，{服务器所有测点（1，22）（2，22）..}）
+
+            server_temp_cold.put("avg",site_avg_cold);  // (avg, {（upall，某列冷上平均）,（downall，某列冷下平均）})
+            server_temp_cold.put("sitedetail",site_cold);// .put("sitedetail",serv);//(sitedetail,{（up，{服务器所有测点（1，22）（2，22）..}）,（down，{服务器所有测点（1，22）（2，22）..}）})
+
+            //热通道
+            server_temp_hot.put("sitedetail",server_site_hot_all); //(sitedetail,{服务器所有测点（1，22）（2，22）..})
+            server_temp_hot.put("avg",site_avg_hot); //(avg,（all，某列热平均）)
+
+
+            servers_cold.put(c,server_temp_cold); //冷通道（A，{(avg,xx),(sitedetail,xx)}）
+            servers_hot.put(c,server_temp_hot); //热通道（A，{}）
+//            servers_power.put(c,server_temp_power); //热通道（A，{}）
+//            break;
+//            server_num+=1;
+//            data.put(sql_temp1,c);
+        }
+
+//        server_temp2=temp_p;
+        data.put("servercold",servers_cold);
+        data.put("serverhot",servers_hot);
+        data.put("serverpower",server_temp_power);
+
+        list_data.add(data);
+        return list_data;
+    }
+
+
+
+    @CrossOrigin
+    @RequestMapping("/getData/202/realdata/server_display")
+    @ResponseBody
+    @Scheduled(fixedRate = 30000)
+    public List<Map<String,Object>> getdata202_servernew3(){
+
+        List <Map<String,Object>> list_data= new ArrayList<>();  //储存返回的json
+        Map<String, Object> data = new HashMap<String, Object>();
+
+        List<String> server = Arrays.asList("A","B","C","D","E","F","G","H","J","K","L","M","N","P");
+        String sql="select Value0 from realdata_once where Location='JF202' and Equipment='服务器A' and SiteName='A1-上' limit 0,1";
+
+        String sql1="select * from realdata_once where Location='JF202' and Equipment='服务器'";
+
+        Map<String, Object> servers_cold= new TreeMap<>();  //所有列列服务器冷通道
+        Map<String, Object> servers_hot= new TreeMap<>();  //某列服务器冷通道
+        Map<String, Object> servers_power= new TreeMap<>();  //某列服务器冷通道
+        Integer siteNum=23;
+
+
+
+        Map<String, Object> server_temp_power = new TreeMap<>();  //某列服务器功率 放在服务器外面，包裹所有服务器
+        for (String c:server){  //遍历服务器 c为（"A","B","C","D" ...）
+
+//            List <Map<String,Object>> list1= new jdbc.queryForList(sql1);
+            Map<String, Object> server_temp_cold= new TreeMap<>();  //某列服务器冷通道
+            Map<String, Object> server_temp_hot = new TreeMap<>();  //某列服务器热通道
+
+            Integer cold_up_cnt_null=0;
+            Integer cold_down_cnt_null=0;
+            Integer hot_cnt_null=0;
+
+            double cold_up_sum=0.0;
+            double cold_down_sum=0.0;
+            double hot_sum=0.0;//某列服务器热通道测点温度求和
+
+            String sql_temp1=sql1.replace("'服务器'","'服务器"+c+"'"); //某服务器所有测点
+            List <Map<String,Object>> list1 =jdbc.queryForList(sql_temp1);
+            Map<Integer, Object> server_site_cold_up =new HashMap<Integer, Object>();  //某列服务器冷通道上测点
+            Map<Integer, Object> server_site_cold_down =new HashMap<Integer, Object>();  //某列服务器冷通道下测点
+            Map<Integer, Object> server_site_hot_all =new HashMap<Integer, Object>();  //某列服务器热通道测点
+            Integer cnt=0;
+            for(Map<String,Object>l:list1){
+                Double value0=(double) l.get("Value0");
+                if(cnt<siteNum*2){
+                    if(cnt%2!=0){//奇数下测点
+                        if(value0<=10 | value0>=26.8){
+                            server_site_cold_down.put((cnt+2)/2,1);//冷上 0 2 4 6 8
+                        }else{
+                            server_site_cold_down.put((cnt+2)/2,0);
+                        }
+                    }else{
+
+                        if(value0<=10 | value0>=26.8){
+                            server_site_cold_up.put((cnt+1)/2,1);//冷下 1 3 5 7
+                        }else{
+                            server_site_cold_up.put((cnt+1)/2,0);
+                        }
+                    }
+                }else if(cnt<69){
+                    if(value0<=28.0 | value0>=38.0){
+                        server_site_hot_all.put(cnt+1-46,1);//热 46 47 48 49
+                    }else{
+                        server_site_hot_all.put(cnt+1-46,0);//热 46 47 48 49
+                    }
+                }
+                cnt++;
+
+            }
+
+            Map<String, Object> server_site =new HashMap<String, Object>();  //服务器测点
+
+            cold_up_sum=cold_up_sum/(siteNum-cold_up_cnt_null);//某列服务冷通道上测点的总和除非0测点的个数，为某列服务器冷通道上测点平均
+            cold_down_sum=cold_down_sum/(siteNum-cold_down_cnt_null);//某列服务冷通道下测点的总和除非0测点的个数，为某列服务器冷通道下测点平均
+            hot_sum=hot_sum/(siteNum-hot_cnt_null);//某列服务热通道测点的总和除非0测点的个数，为某列服务器热通道测点平均
+
+            String t1 = String.format("%.2f", cold_up_sum);
+            String t2 = String.format("%.2f", cold_down_sum);
+            String t3 = String.format("%.2f", hot_sum); // 保留两位小数
+
+
+            Map<String, Object> site_avg_cold = new TreeMap<>();//某服务器冷通道平均
+            Map<String, Object> site_avg_hot = new TreeMap<>();//热通道平均
+            Map<String, Object> site_cold = new TreeMap<>(); //冷通道
+            Map<String, Object> site_hot = new TreeMap<>();//热通道
+            Map<String, Object> site_power = new TreeMap<>();//功率
+//            TreeMap<String, Object> server_site22_avg = new TreeMap<>(server_site2_avg);  //测点排序
+
+            site_avg_cold.put("upall",t1);//冷通道上，（upall，某列冷上平均）
+            site_avg_cold.put("downall",t2);//冷通道下 （downall，某列冷下平均）
+            site_avg_hot.put("all",t3); ////热通道  （all，某列热平均）
+
+            site_cold.put("up",server_site_cold_up); //某列服务器所有上测点  （up，{服务器所有测点（1，22）（2，22）..}）
+            site_cold.put("down",server_site_cold_down);//某列服务器所有下测点  （down，{服务器所有测点（1，22）（2，22）..}）
+
+            server_temp_cold.put("avg",site_avg_cold);  // (avg, {（upall，某列冷上平均）,（downall，某列冷下平均）})
+            server_temp_cold.put("sitedetail",site_cold);// .put("sitedetail",serv);//(sitedetail,{（up，{服务器所有测点（1，22）（2，22）..}）,（down，{服务器所有测点（1，22）（2，22）..}）})
+
+            //热通道
+            server_temp_hot.put("sitedetail",server_site_hot_all); //(sitedetail,{服务器所有测点（1，22）（2，22）..})
+            server_temp_hot.put("avg",site_avg_hot); //(avg,（all，某列热平均）)
+
+
+            servers_cold.put(c,server_temp_cold); //冷通道（A，{(avg,xx),(sitedetail,xx)}）
+            servers_hot.put(c,server_temp_hot); //热通道（A，{}）
+//            servers_power.put(c,server_temp_power); //热通道（A，{}）
+//            break;
+//            server_num+=1;
+//            data.put(sql_temp1,c);
+        }
+
+//        server_temp2=temp_p;
+        data.put("servercold",servers_cold);
+        data.put("serverhot",servers_hot);
+//        data.put("serverpower",server_temp_power);
+
+        list_data.add(data);
+        return list_data;
+    }
 
     ////新代码
     @CrossOrigin
