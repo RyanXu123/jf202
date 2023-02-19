@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.*;
 
 @Controller
-public class aidisplay_controller {
+public class aidisplay_202_controller {
 
     @Autowired
     private JdbcTemplate jdbc;
@@ -21,7 +21,7 @@ public class aidisplay_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/aidisplay")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_ai(){
         String sql="select * from aidisplay";
         List <Map<String,Object>> list=jdbc.queryForList(sql);

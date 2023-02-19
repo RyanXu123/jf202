@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-public class aiparams_controller {
+public class aiparams_202_controller {
     @Autowired
     private JdbcTemplate jdbc;
 
@@ -20,7 +20,7 @@ public class aiparams_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/aiparams")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_ai(){
         String sql="select * from aiparams limit 0,5";
         List <Map<String,Object>> list=jdbc.queryForList(sql);

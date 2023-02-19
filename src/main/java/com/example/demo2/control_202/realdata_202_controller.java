@@ -21,7 +21,7 @@ public class realdata_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/realtime/ktall")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_kt(){
         String sql="select Equipment,PointName,SiteName,Value0 from realdata_once where Location='JF202' and EquipmentType='KT'";
         List <Map<String,Object>> list=jdbc.queryForList(sql);
@@ -31,7 +31,7 @@ public class realdata_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/realtime/ktparams")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_ktparams(){
         String sql="select Equipment,SiteName from realdata_once where Location='JF202' and PointName='所有参数' limit 0,20";
         List <Map<String,Object>> list=jdbc.queryForList(sql);
@@ -41,7 +41,7 @@ public class realdata_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/realtime/serverall")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_server(){
         String sql="select Equipment,PointName,SiteName,Value0 from realdata_once where Location='JF202' and EquipmentType='Server'";
         List <Map<String,Object>> list=jdbc.queryForList(sql);
@@ -51,7 +51,7 @@ public class realdata_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/realtime/serveravgcold")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_serveravg(){
         String sql="select Equipment,PointName,SiteName from realdata_once where Location='JF202'  and PointName='冷通道上平均' order by Equipment limit 0,14";
         String sql2="select Equipment,PointName,SiteName from realdata_once where Location='JF202'  and PointName='冷通道下平均' order by Equipment limit 0,14";
@@ -64,7 +64,7 @@ public class realdata_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/realtime/serveravghot")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_serveravg2(){
         String sql="select Equipment,PointName,SiteName from realdata_once where Location='JF202'  and PointName='热通道平均' order by Equipment limit 0,14";
 //        String sql2="select Equipment,PointName,SiteName from realtime4 where Location='JF202'  and PointName='热通道下平均' order by Equipment";
@@ -77,7 +77,7 @@ public class realdata_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/realtime/serverpower")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_serverpower(){
         String sql="select * from realdata_once where Location='JF202'  and PointName='服务器功率' order by Equipment";
         List <Map<String,Object>> list=jdbc.queryForList(sql);
@@ -89,7 +89,75 @@ public class realdata_202_controller {
 
 
 
+    Map<Integer,List<Double>> kt_hf = new HashMap<>();
+    Map<Integer,List<Double>> kt_sf = new HashMap<>();
 
+    @CrossOrigin
+    @RequestMapping("/getData/202/realdata/kt_stable")
+    @ResponseBody
+//    @Scheduled(fixedRate = 30000)
+    public List<Map<String,Object>> getdata202_judge3(){
+
+        List <Map<String,Object>> list_all= new ArrayList<>();
+        String sql20_sf=" select PointName,Equipment,Value0 from realdata_once where Location='JF202' and Equipment='空调0'";  //从表中筛选某空调的所有参数
+        List <Map<String,Object>> list_temp= new ArrayList<>();
+        Map<String,Object> a = new HashMap<>();
+        Map<Integer,Object> kt_all = new HashMap<>();
+        for(Integer i=1;i<=20;i++){
+            String sql_temp=sql20_sf.replace("空调0","空调"+i);   //遍历所有空调 1，2....20
+            List <Map<String,Object>> list_kt=jdbc.queryForList(sql_temp); //一台空调所有参数，list里面为一台空调的所有参数：回风温度、送风温度等等
+
+            List<Double> sf =kt_sf.get(i+1);
+            List<Double> hf= kt_hf.get(i+1);//第一次进入没有该键值对
+            try{
+                if(sf.size()==1000){
+                    sf.remove(0);
+                }
+            }catch (Exception e){
+                sf=new ArrayList<>();
+            }
+
+            try{
+                if(hf.size()==1000){
+                    hf.remove(0);
+                }
+            }catch (Exception e){
+                hf=new ArrayList<>();
+            }
+
+            Map<String,Object> temp = new HashMap<>();
+            for (Map<String,Object> c:list_kt){
+                String params=c.get("PointName").toString();
+                Double value0=(double) c.get("Value0");
+                Double value_temp=sf.stream().reduce(Double::sum).orElse(0.0);
+                if(params.equals("送风温度1")){
+                    if ((value0> value_temp+1|value0<value_temp-1) &value_temp!=0.0){//数据非异常、非空，则进行判断
+                        temp.put("kt","空调"+i+1);
+                        temp.put("detail"+i+1,"送风波动");
+                        list_temp.add(temp);
+                        temp.clear();
+                    }
+                    sf.add(value_temp);
+                }else if(params.equals("回风温度1")) {
+                    String params2 = c.get("PointName").toString();
+                    Double value02 = (double) c.get("Value0");
+                    Double value_temp2 = hf.stream().reduce(Double::sum).orElse(0.0);
+                    if (params2.equals("回风温度1")) {//数据非异常、非空
+
+                        if ((value02 > value_temp2 + 1 | value02 < value_temp2 - 1) & value_temp2 != 0.0) {
+                            temp.put("kt", "空调" + i + 1);
+                            temp.put("detail" + i + 1, "回风波动");
+                            list_temp.add(temp);
+                            temp.clear();
+                        }
+                        hf.add(value02);
+                    }
+                }
+
+            }
+        }
+        return list_temp;
+    }
 
 
 
@@ -103,7 +171,7 @@ public class realdata_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/realdata/ktnew")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_data(){
 
         //        kt2
@@ -146,7 +214,7 @@ public class realdata_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/realdata/servernew2")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_p(){
 
         List <Map<String,Object>> list_data= new ArrayList<>();  //储存返回的json
@@ -342,7 +410,7 @@ public class realdata_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/realdata/servernew")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_servernew2(){
 
         List <Map<String,Object>> list_data= new ArrayList<>();  //储存返回的json
@@ -377,22 +445,22 @@ public class realdata_202_controller {
 
             String sql_temp1=sql1.replace("'服务器'","'服务器"+c+"'"); //某服务器所有测点
             List <Map<String,Object>> list1 =jdbc.queryForList(sql_temp1);
-            Map<Integer, Object> server_site_cold_up =new HashMap<Integer, Object>();  //某列服务器冷通道上测点
-            Map<Integer, Object> server_site_cold_down =new HashMap<Integer, Object>();  //某列服务器冷通道下测点
-            Map<Integer, Object> server_site_hot_all =new HashMap<Integer, Object>();  //某列服务器热通道测点
+            List <Double>server_site_cold_up =new ArrayList<>();  //某列服务器冷通道上测点
+            List <Double>server_site_cold_down =new ArrayList<>();  //某列服务器冷通道下测点
+            List <Double>server_site_hot_all =new ArrayList<>();  //某列服务器热通道测点
             Integer cnt=0;
             for(Map<String,Object>l:list1){
-                Double value0=(double) l.get("Value0");
+                double value0=(double) l.get("Value0");
                 if(cnt<siteNum*2){
                     if(cnt%2!=0){//奇数下测点
-                        server_site_cold_down.put((cnt+2)/2,value0);//冷上 0 2 4 6 8
+                        server_site_cold_down.add(value0);//冷上 0 2 4 6 8
                         if(value0<=0.0){
                             cold_up_cnt_null++;
                         }else{
                             cold_up_sum+=value0;
                         }
                     }else{
-                        server_site_cold_up.put((cnt+1)/2,value0);//冷下 1 3 5 7
+                        server_site_cold_up.add(value0);//冷下 1 3 5 7
                         if(value0<=0.0){
                             cold_down_cnt_null++;
                         }else{
@@ -400,7 +468,7 @@ public class realdata_202_controller {
                         }
                     }
                 }else if(cnt<69){
-                    server_site_hot_all.put(cnt+1-46,value0);//热 46 47 48 49
+                    server_site_hot_all.add(value0);//热 46 47 48 49
                     if(value0<=0.0){
                         hot_cnt_null++;
                     }else{
@@ -437,6 +505,71 @@ public class realdata_202_controller {
 
             site_cold.put("up",server_site_cold_up); //某列服务器所有上测点  （up，{服务器所有测点（1，22）（2，22）..}）
             site_cold.put("down",server_site_cold_down);//某列服务器所有下测点  （down，{服务器所有测点（1，22）（2，22）..}）
+            //返回索引最高和次高温度
+            TreeSet<Double> cold_up_temp=new TreeSet<Double>(server_site_cold_up);
+            TreeSet<Double> cold_down_temp=new TreeSet<Double>(server_site_cold_down);
+            TreeSet<Double> hot_temp=new TreeSet<Double>(server_site_hot_all);
+//
+//            Collections.sort(cold_up_temp);
+//            Collections.sort(cold_down_temp);
+//            Collections.sort(hot_temp);
+
+            double cold_max_up1=0.0;
+            double cold_max_up2=0.0;
+            double cold_max_down1=0.0;
+            double cold_max_down2=0.0;
+
+            int cnt_num=1;
+            for( Double i:cold_up_temp){
+                if(cnt_num==cold_up_temp.size()){
+                    cold_max_up1=i;
+                }else if(cnt_num==cold_up_temp.size()-1){
+                    cold_max_up2=i;
+                }
+                cnt_num++;
+            }
+
+            cnt_num=1;
+            for( Double i:cold_down_temp){
+                if(cnt_num==cold_down_temp.size()){
+                    cold_max_down1=i;//最大
+                }else if(cnt_num==cold_down_temp.size()-1){
+                    cold_max_down2=i;//次大
+                }
+                cnt_num++;
+            }//找出最大值和次大值
+
+            List <Integer>up_index=new ArrayList<>();
+            List <Integer>down_index=new ArrayList<>();
+            List <Integer>up2_index=new ArrayList<>();
+            List <Integer>down2_index=new ArrayList<>();
+            int index_cnt=0;
+            for(double i :server_site_cold_up){
+                if(i==cold_max_up1){
+                    up_index.add(index_cnt);
+                }else if(i ==cold_max_up2){
+                    up2_index.add(index_cnt);
+                }
+                index_cnt++;
+            }
+
+            index_cnt=0;
+            for(double i :server_site_cold_down){
+                if(i==cold_max_down1){
+                    down_index.add(index_cnt);
+                }else if(i ==cold_max_down2){
+                    down2_index.add(index_cnt);
+                }
+                index_cnt++;
+            }
+
+
+//            double hot_max1= (double)cold_up_temp.get(cold_up_temp.size()-1);
+//            double hot_max2= (double)cold_up_temp.get(cold_up_temp.size()-2);
+            site_cold.put("cold_up_max_index",up_index);  //在数组查找索引
+            site_cold.put("cold_up_submax_index",up2_index);
+            site_cold.put("cold_down_max_index",down_index);
+            site_cold.put("cold_down_submax_index",down2_index);
 
             server_temp_cold.put("avg",site_avg_cold);  // (avg, {（upall，某列冷上平均）,（downall，某列冷下平均）})
             server_temp_cold.put("sitedetail",site_cold);// .put("sitedetail",serv);//(sitedetail,{（up，{服务器所有测点（1，22）（2，22）..}）,（down，{服务器所有测点（1，22）（2，22）..}）})
@@ -468,7 +601,7 @@ public class realdata_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/realdata/server_display")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_servernew3(){
 
         List <Map<String,Object>> list_data= new ArrayList<>();  //储存返回的json
@@ -503,32 +636,38 @@ public class realdata_202_controller {
 
             String sql_temp1=sql1.replace("'服务器'","'服务器"+c+"'"); //某服务器所有测点
             List <Map<String,Object>> list1 =jdbc.queryForList(sql_temp1);
-            Map<Integer, Object> server_site_cold_up =new HashMap<Integer, Object>();  //某列服务器冷通道上测点
-            Map<Integer, Object> server_site_cold_down =new HashMap<Integer, Object>();  //某列服务器冷通道下测点
-            Map<Integer, Object> server_site_hot_all =new HashMap<Integer, Object>();  //某列服务器热通道测点
+            List<Double> server_site_cold_up =new ArrayList<>(); //某列服务器冷通道上测点
+            List<Double> server_site_cold_down =new ArrayList<>();  //某列服务器冷通道下测点
+            List<Double> server_site_hot_all =new ArrayList<>();  //某列服务器热通道测点
             Integer cnt=0;
             for(Map<String,Object>l:list1){
                 Double value0=(double) l.get("Value0");
                 if(cnt<siteNum*2){
                     if(cnt%2!=0){//奇数下测点
-                        if(value0<=10 | value0>=26.8){
-                            server_site_cold_down.put((cnt+2)/2,1);//冷上 0 2 4 6 8
+                        if( value0>=26.8){
+                            server_site_cold_down.add(1.0);//冷上 0 2 4 6 8  过热1
+                        }else if( value0<=0.0){
+                            server_site_cold_down.add(-1.0);//+1      异常-1
                         }else{
-                            server_site_cold_down.put((cnt+2)/2,0);
+                            server_site_cold_down.add(0.0);         //正常0
                         }
                     }else{
 
-                        if(value0<=10 | value0>=26.8){
-                            server_site_cold_up.put((cnt+1)/2,1);//冷下 1 3 5 7
+                        if(value0>=26.8){
+                            server_site_cold_up.add(1.0);//冷下 1 3 5 7
+                        }else if( value0<=0.0){
+                            server_site_cold_up.add(-1.0);
                         }else{
-                            server_site_cold_up.put((cnt+1)/2,0);
+                            server_site_cold_up.add(0.0);
                         }
                     }
                 }else if(cnt<69){
-                    if(value0<=28.0 | value0>=38.0){
-                        server_site_hot_all.put(cnt+1-46,1);//热 46 47 48 49
+                    if((value0<=28.0 & value0>0.0)| value0>=38.0){
+                        server_site_hot_all.add(1.0);//热 46 47 48 49
+                    }else if( value0<=0.0){
+                        server_site_hot_all.add(-1.0);//热 46 47 48 49
                     }else{
-                        server_site_hot_all.put(cnt+1-46,0);//热 46 47 48 49
+                        server_site_hot_all.add(0.0);
                     }
                 }
                 cnt++;
@@ -560,6 +699,7 @@ public class realdata_202_controller {
             site_cold.put("up",server_site_cold_up); //某列服务器所有上测点  （up，{服务器所有测点（1，22）（2，22）..}）
             site_cold.put("down",server_site_cold_down);//某列服务器所有下测点  （down，{服务器所有测点（1，22）（2，22）..}）
 
+
             server_temp_cold.put("avg",site_avg_cold);  // (avg, {（upall，某列冷上平均）,（downall，某列冷下平均）})
             server_temp_cold.put("sitedetail",site_cold);// .put("sitedetail",serv);//(sitedetail,{（up，{服务器所有测点（1，22）（2，22）..}）,（down，{服务器所有测点（1，22）（2，22）..}）})
 
@@ -589,7 +729,7 @@ public class realdata_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/realdata/kt_diagnosis")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_judge(){
 
         //        kt2
@@ -629,6 +769,20 @@ public class realdata_202_controller {
     return list_temp;
     }
 
+    @CrossOrigin
+    @RequestMapping("/AI_data")
+    @ResponseBody
+//    @Scheduled(fixedRate = 30000)
+    public Map<String,Object> params(){
+        Map<String,Object> m=new HashMap<>();
+        m.put("热点检查阈值","26.8℃");
+//        m.put("AI预控控制范围","2℃");
+        m.put("AI群控控制范围","1℃");
+        m.put("AI群控控制周期","30min");
+        m.put("AI控制状态","节能");
+//        m.put("AI控制状态","安全");
+        return m;
+    }
 
 
 
@@ -663,7 +817,7 @@ public class realdata_202_controller {
                         list_temp.add(site);
                     }
                 }else if(PointName.equals("热通道温度")){
-                    if(value0<28 | value0>32){
+                    if((value0>0&value0<28) | value0>38){
                         list_temp.add(site);
                     }
                 }

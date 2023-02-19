@@ -23,7 +23,7 @@ public class aicmd_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/aicmd")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_aicmd(){
         String sql="select * from aicmd where CommandType='群控控制' " ;
         String sql2="select * from aicmd where CommandType='预控控制' " ;
@@ -60,7 +60,9 @@ public class aicmd_202_controller {
             }
         }
         if(cnt==2){//两条心跳，则发送之前指令
+            cnt=0;
             return list_cmd;
+
         }else{//如果群控或预控有指令，则传送，并更新全局变量为最新指令
             list_cmd=list_temp_cmd;
             return list_cmd;

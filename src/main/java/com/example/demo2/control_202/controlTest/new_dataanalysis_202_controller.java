@@ -1,4 +1,4 @@
-//package com.example.demo2.control_203;
+//package com.example.demo2.control_202;
 //
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.jdbc.core.JdbcTemplate;
@@ -8,35 +8,32 @@
 //import org.springframework.web.bind.annotation.RequestMapping;
 //import org.springframework.web.bind.annotation.ResponseBody;
 //
-//import java.util.ArrayList;
-//import java.util.HashMap;
-//import java.util.List;
-//import java.util.Map;
+//import java.util.*;
 //
 //@Controller
-//public class dataanalysis_203_controller {
+//public class new_dataanalysis_202_controller {
 //    @Autowired
 //    private JdbcTemplate jdbc;
 //
 //    @CrossOrigin
-//    @RequestMapping("/getData/203/dataanalysisnew")
+//    @RequestMapping("/getData/202/dataanalysisnew0")
 //    @ResponseBody
-//    @Scheduled(fixedRate = 30000)
-//    public List<Map<String,Object>> getdata203_data(){
+////    @Scheduled(fixedRate = 30000)
+//    public List<Map<String,Object>> getdata202_data(){
 //        List <Map<String,Object>> list_all= new ArrayList<Map<String,Object>>();
-//        String  sql0_sf4=" select Value0,time from realdata where Location='JF203' and Equipment='空调0' and PointName='送风温度4' ORDER BY  unix_timestamp(time) ";
-//        String  sql0_sf1=" select Value0,time from realdata where Location='JF203' and Equipment='空调0' and PointName='送风温度1' ORDER BY  unix_timestamp(time) ";
-//        String  sql0_sfd=" select Value0,time from realdata where Location='JF203' and Equipment='空调0' and PointName='送风温度设定' ORDER BY  unix_timestamp(time) ";
-//        String  sql0_hf1=" select Value0,time from realdata where Location='JF203' and Equipment='空调0' and PointName='回风温度1' ORDER BY  unix_timestamp(time) ";
-//        String  sql0_hf2=" select Value0,time from realdata where Location='JF203' and Equipment='空调0' and PointName='回风温度2' ORDER BY  unix_timestamp(time) ";
-//        String  sql0_hf3=" select Value0,time from realdata where Location='JF203' and Equipment='空调0' and PointName='回风温度3' ORDER BY  unix_timestamp(time) ";
-//        String  sql0_hf4=" select Value0,time from realdata where Location='JF203' and Equipment='空调0' and PointName='回风温度4' ORDER BY  unix_timestamp(time) ";
-//        String  sql0_hfd=" select Value0,time from realdata where Location='JF203' and Equipment='空调0' and PointName='回风温度设定' ORDER BY  unix_timestamp(time) ";
-//        String  sql0_ysj1=" select Value0,time from realdata where Location='JF203' and Equipment='空调0' and PointName='压缩机1容量' ORDER BY  unix_timestamp(time) ";
-//        String  sql0_ysj2=" select Value0,time from realdata where Location='JF203' and Equipment='空调0' and PointName='压缩机2容量' ORDER BY  unix_timestamp(time) ";
-//        String  sql0_fj1=" select Value0,time from realdata where Location='JF203' and Equipment='空调0' and PointName='风机1转速' ORDER BY  unix_timestamp(time) ";
-//        String  sql0_fj2=" select Value0,time from realdata where Location='JF203' and Equipment='空调0' and PointName='风机2转速' ORDER BY  unix_timestamp(time) ";
-//        String  sql0_p=" select Value0,time from realdata where Location='JF203' and Equipment='空调0' and PointName='空调功率' ORDER BY  unix_timestamp(time) ";
+//        String  sql0_sf4=" select Value0,time from realdata where Location='JF202' and Equipment='空调0' and PointName='送风温度4' ORDER BY  unix_timestamp(time) ";
+//        String  sql0_sf1=" select Value0,time from realdata where Location='JF202' and Equipment='空调0' and PointName='送风温度1' ORDER BY  unix_timestamp(time) ";
+//        String  sql0_sfd=" select Value0,time from realdata where Location='JF202' and Equipment='空调0' and PointName='送风温度设定' ORDER BY  unix_timestamp(time) ";
+//        String  sql0_hf1=" select Value0,time from realdata where Location='JF202' and Equipment='空调0' and PointName='回风温度1' ORDER BY  unix_timestamp(time) ";
+//        String  sql0_hf2=" select Value0,time from realdata where Location='JF202' and Equipment='空调0' and PointName='回风温度2' ORDER BY  unix_timestamp(time) ";
+//        String  sql0_hf3=" select Value0,time from realdata where Location='JF202' and Equipment='空调0' and PointName='回风温度3' ORDER BY  unix_timestamp(time) ";
+//        String  sql0_hf4=" select Value0,time from realdata where Location='JF202' and Equipment='空调0' and PointName='回风温度4' ORDER BY  unix_timestamp(time) ";
+//        String  sql0_hfd=" select Value0,time from realdata where Location='JF202' and Equipment='空调0' and PointName='回风温度设定' ORDER BY  unix_timestamp(time) ";
+//        String  sql0_ysj1=" select Value0,time from realdata where Location='JF202' and Equipment='空调0' and PointName='压缩机1容量' ORDER BY  unix_timestamp(time) ";
+//        String  sql0_ysj2=" select Value0,time from realdata where Location='JF202' and Equipment='空调0' and PointName='压缩机2容量' ORDER BY  unix_timestamp(time) ";
+//        String  sql0_fj1=" select Value0,time from realdata where Location='JF202' and Equipment='空调0' and PointName='风机1转速' ORDER BY  unix_timestamp(time) ";
+//        String  sql0_fj2=" select Value0,time from realdata where Location='JF202' and Equipment='空调0' and PointName='风机2转速' ORDER BY  unix_timestamp(time) ";
+//        String  sql0_p=" select Value0,time from realdata where Location='JF202' and Equipment='空调0' and PointName='空调功率' ORDER BY  unix_timestamp(time) ";
 //
 //        Map<String,Object> kt_all = new HashMap<>();
 //        for(Integer i=1;i<=20;i++) {
@@ -163,9 +160,9 @@
 //            temp.put("空调功率", value);
 //            kt_all.put("空调"+i ,temp);
 //        }
-////
 //
-//        String sql=" select time from realdata where Location='JF203' and Equipment='空调1' and PointName='空调功率' ORDER BY  unix_timestamp(time)    ";
+//
+//        String sql=" select time from realdata where Location='JF202' and Equipment='空调1' and PointName='空调功率' ORDER BY  unix_timestamp(time)    ";
 //        List <Map<String,Object>> time_list=jdbc.queryForList(sql);
 //        List time= new ArrayList();
 //        for (Map<String, Object> time0 : time_list) {
@@ -174,7 +171,7 @@
 ////            System.out.println(name);
 //        }
 //        Map<String,Object> ret=new HashMap<>();
-//        ret.put("203机房参数",kt_all);
+//        ret.put("202机房参数",kt_all);
 //        ret.put("时间轴",time);
 //
 //        list_all.add(ret);

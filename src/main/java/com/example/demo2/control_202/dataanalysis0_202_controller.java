@@ -25,7 +25,7 @@ import java.util.*;
         //    @CrossOrigin
         @RequestMapping("/getData/202/dataanalysisnew")
         @ResponseBody
-        @Scheduled(fixedRate = 30000)
+//        @Scheduled(fixedRate = 30000)
         public List<Map<String,Object>> showAnalysis(){
             ArrayList<KtDto> res = new ArrayList<>();
             List <Map<String,Object>> final0= new ArrayList<>();
