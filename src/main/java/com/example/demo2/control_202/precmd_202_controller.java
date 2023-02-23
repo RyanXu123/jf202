@@ -23,7 +23,7 @@ public class precmd_202_controller {
     public List<Map<String,Object>> getdata202_pre(){ //按服务器和空调变化状态给数据
 
         String sql="select * from precmd where Location='JF202'";
-        String sql2="select * from predata where Location='JF202'and PointName='冷通道最大温度' limit 0,6";
+        String sql2="select * from predata where Location='JF202'and PointName='冷通道最大温度' ORDER BY id DESC limit 0,7";
         List <Map<String,Object>> list0= new ArrayList<>();
         List <Map<String,Object>> list=jdbc.queryForList(sql);
         List <Map<String,Object>> list2=jdbc.queryForList(sql2);

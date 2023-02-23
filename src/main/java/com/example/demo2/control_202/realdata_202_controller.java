@@ -18,61 +18,61 @@ public class realdata_202_controller {
     private JdbcTemplate jdbc;
 
 ///之前的代码
-    @CrossOrigin
-    @RequestMapping("/getData/202/realtime/ktall")
-    @ResponseBody
-//    @Scheduled(fixedRate = 30000)
-    public List<Map<String,Object>> getdata202_kt(){
-        String sql="select Equipment,PointName,SiteName,Value0 from realdata_once where Location='JF202' and EquipmentType='KT'";
-        List <Map<String,Object>> list=jdbc.queryForList(sql);
-        return list;
-    }
+//    @CrossOrigin
+//    @RequestMapping("/getData/202/realtime/ktall")
+//    @ResponseBody
+////    @Scheduled(fixedRate = 30000)
+//    public List<Map<String,Object>> getdata202_kt(){
+//        String sql="select Equipment,PointName,SiteName,Value0 from realdata_once where Location='JF202' and EquipmentType='KT'";
+//        List <Map<String,Object>> list=jdbc.queryForList(sql);
+//        return list;
+//    }
 
-    @CrossOrigin
-    @RequestMapping("/getData/202/realtime/ktparams")
-    @ResponseBody
-//    @Scheduled(fixedRate = 30000)
-    public List<Map<String,Object>> getdata202_ktparams(){
-        String sql="select Equipment,SiteName from realdata_once where Location='JF202' and PointName='所有参数' limit 0,20";
-        List <Map<String,Object>> list=jdbc.queryForList(sql);
-        return list;
-    }
+//    @CrossOrigin
+//    @RequestMapping("/getData/202/realtime/ktparams")
+//    @ResponseBody
+////    @Scheduled(fixedRate = 30000)
+//    public List<Map<String,Object>> getdata202_ktparams(){
+//        String sql="select Equipment,SiteName from realdata_once where Location='JF202' and PointName='所有参数' limit 0,20";
+//        List <Map<String,Object>> list=jdbc.queryForList(sql);
+//        return list;
+//    }
 
-    @CrossOrigin
-    @RequestMapping("/getData/202/realtime/serverall")
-    @ResponseBody
-//    @Scheduled(fixedRate = 30000)
-    public List<Map<String,Object>> getdata202_server(){
-        String sql="select Equipment,PointName,SiteName,Value0 from realdata_once where Location='JF202' and EquipmentType='Server'";
-        List <Map<String,Object>> list=jdbc.queryForList(sql);
-        return list;
-    }
+//    @CrossOrigin
+//    @RequestMapping("/getData/202/realtime/serverall")
+//    @ResponseBody
+////    @Scheduled(fixedRate = 30000)
+//    public List<Map<String,Object>> getdata202_server(){
+//        String sql="select Equipment,PointName,SiteName,Value0 from realdata_once where Location='JF202' and EquipmentType='Server'";
+//        List <Map<String,Object>> list=jdbc.queryForList(sql);
+//        return list;
+//    }
 
-    @CrossOrigin
-    @RequestMapping("/getData/202/realtime/serveravgcold")
-    @ResponseBody
-//    @Scheduled(fixedRate = 30000)
-    public List<Map<String,Object>> getdata202_serveravg(){
-        String sql="select Equipment,PointName,SiteName from realdata_once where Location='JF202'  and PointName='冷通道上平均' order by Equipment limit 0,14";
-        String sql2="select Equipment,PointName,SiteName from realdata_once where Location='JF202'  and PointName='冷通道下平均' order by Equipment limit 0,14";
-        List <Map<String,Object>> list=jdbc.queryForList(sql);
-        List <Map<String,Object>> list2=jdbc.queryForList(sql2);
-        list.addAll(list2);
-        return list;
-    }
-
-    @CrossOrigin
-    @RequestMapping("/getData/202/realtime/serveravghot")
-    @ResponseBody
-//    @Scheduled(fixedRate = 30000)
-    public List<Map<String,Object>> getdata202_serveravg2(){
-        String sql="select Equipment,PointName,SiteName from realdata_once where Location='JF202'  and PointName='热通道平均' order by Equipment limit 0,14";
-//        String sql2="select Equipment,PointName,SiteName from realtime4 where Location='JF202'  and PointName='热通道下平均' order by Equipment";
-        List <Map<String,Object>> list=jdbc.queryForList(sql);
+//    @CrossOrigin
+//    @RequestMapping("/getData/202/realtime/serveravgcold")
+//    @ResponseBody
+////    @Scheduled(fixedRate = 30000)
+//    public List<Map<String,Object>> getdata202_serveravg(){
+//        String sql="select Equipment,PointName,SiteName from realdata_once where Location='JF202'  and PointName='冷通道上平均' order by Equipment limit 0,14";
+//        String sql2="select Equipment,PointName,SiteName from realdata_once where Location='JF202'  and PointName='冷通道下平均' order by Equipment limit 0,14";
+//        List <Map<String,Object>> list=jdbc.queryForList(sql);
 //        List <Map<String,Object>> list2=jdbc.queryForList(sql2);
 //        list.addAll(list2);
-        return list;
-    }
+//        return list;
+//    }
+
+//    @CrossOrigin
+//    @RequestMapping("/getData/202/realtime/serveravghot")
+//    @ResponseBody
+////    @Scheduled(fixedRate = 30000)
+//    public List<Map<String,Object>> getdata202_serveravg2(){
+//        String sql="select Equipment,PointName,SiteName from realdata_once where Location='JF202'  and PointName='热通道平均' order by Equipment limit 0,14";
+////        String sql2="select Equipment,PointName,SiteName from realtime4 where Location='JF202'  and PointName='热通道下平均' order by Equipment";
+//        List <Map<String,Object>> list=jdbc.queryForList(sql);
+////        List <Map<String,Object>> list2=jdbc.queryForList(sql2);
+////        list.addAll(list2);
+//        return list;
+//    }
 
     @CrossOrigin
     @RequestMapping("/getData/202/realtime/serverpower")
@@ -186,13 +186,14 @@ public class realdata_202_controller {
 //        String sql20_fj2=" select Value0,time from realdata_once where Location='JF202' and Equipment='空调0'  and PointName='风机2转速'";
 //        String sql20_p=" select Value0,time from realdata_once where Location='JF202' and Equipment='空调0' and PointName='空调功率'";
 
-        Map<Integer,Object> kt_all = new HashMap<>();
+        TreeMap<Integer,Object> kt_all = new TreeMap<>();
         for(Integer i=1;i<=20;i++){
             String sql_temp=sql20_sf.replace("空调0","空调"+i);   //遍历所有空调 1，2....20
 
             List <Map<String,Object>> list_kt=jdbc.queryForList(sql_temp); //一台空调所有参数，list里面为一台空调的所有参数：回风温度、送风温度等等
             //select * from realdata_once where Location='JF202' and Equipment='空调1'  在数据库里面运行该sql，查看返回的字段
-            Map<String,Object> temp = new HashMap<>();
+            LinkedHashMap<String,Object> temp = new LinkedHashMap<>();
+            LinkedHashMap<String,Object> temp2 = new LinkedHashMap<>();
 
             for(Map<String,Object> kt:list_kt){//遍历返回的list，截取PointName和value0列，即参数名称和参数值
                     Object PointName = kt.get("PointName");
@@ -200,8 +201,25 @@ public class realdata_202_controller {
                     Object Value0 = kt.get("Value0");
                     temp.put(PointName2,Value0);
             }
-            kt_all.put(i,temp);  // 存入键值对，如空调1 为（1，空调1所有参数的PointName和value0对）
+              // 存入键值对，如空调1 为（1，空调1所有参数的PointName和value0对）
+            temp2.put("压缩机1容量",temp.get("压缩机1容量"));
+            temp2.put("压缩机2容量",temp.get("压缩机2容量"));
+            temp2.put("风机1转速",temp.get("风机1转速"));
+            temp2.put("风机2转速",temp.get("风机2转速"));
+            temp2.put("冷凝风机1转速",temp.get("冷凝风机1转速"));
+            temp2.put("冷凝风机2转速",temp.get("冷凝风机2转速"));
+            temp2.put("回风温度设定",temp.get("回风温度设定"));
+            temp2.put("回风温度1",temp.get("回风温度1"));
+            temp2.put("回风温度2",temp.get("回风温度2"));
+            temp2.put("回风温度3",temp.get("回风温度3"));
+            temp2.put("回风温度4",temp.get("回风温度4"));
+            temp2.put("送风温度设定",temp.get("送风温度设定"));
+            temp2.put("送风温度1",temp.get("送风温度1"));
+            temp2.put("送风温度4",temp.get("送风温度4"));
+            kt_all.put(i,temp2);
         }
+
+
         Map<String,Object> kt_name = new HashMap<>();
         kt_name.put("机房空调",kt_all);   // 存入键值对 ,样式为（机房空调，{[1，空调1参数键值对],[2,空调2参数键值对]...})）
         list_all.add(kt_name);
@@ -768,22 +786,6 @@ public class realdata_202_controller {
 
     return list_temp;
     }
-
-    @CrossOrigin
-    @RequestMapping("/AI_data")
-    @ResponseBody
-//    @Scheduled(fixedRate = 30000)
-    public Map<String,Object> params(){
-        Map<String,Object> m=new HashMap<>();
-        m.put("热点检查阈值","26.8℃");
-//        m.put("AI预控控制范围","2℃");
-        m.put("AI群控控制范围","1℃");
-        m.put("AI群控控制周期","30min");
-        m.put("AI控制状态","节能");
-//        m.put("AI控制状态","安全");
-        return m;
-    }
-
 
 
 
