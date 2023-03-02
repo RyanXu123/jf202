@@ -1,10 +1,12 @@
 package com.example.demo2.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 @Data
-public class dataanalysis {
 
+public class dataanalysis {
+    @TableId
     private String Equipment;
     private String Location;
     private double SF1;

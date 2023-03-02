@@ -39,20 +39,6 @@ public class aipreparams_203_controller {
         return list2;
     }
 
-    @CrossOrigin
-    @RequestMapping("/202/AI_data")
-    @ResponseBody
-//    @Scheduled(fixedRate = 30000)
-    public Map<String,Object> params(){
-        Map<String,Object> m=new HashMap<>();
-        m.put("热点检查阈值","26.8℃");
-//        m.put("AI预控控制范围","2℃");
-        m.put("AI群控控制范围","1℃");
-        m.put("AI群控控制周期","30min");
-        m.put("AI控制状态","节能");
-//        m.put("AI控制状态","安全");
-        return m;
-    }
 
     @CrossOrigin
     @RequestMapping("/getData/203/jfparams")

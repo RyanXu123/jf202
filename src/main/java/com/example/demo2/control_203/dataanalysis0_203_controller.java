@@ -28,7 +28,7 @@ public class dataanalysis0_203_controller {
         Map<String,Object> kt_all=new LinkedHashMap<>();
 
         LinkedList<String> Time_line= new LinkedList<>();
-        for (int i = 1; i < 5; i++) {
+        for (int i = 1; i < 13; i++) {
             LambdaQueryWrapper<dataanalysis> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(dataanalysis::getEquipment , "KT"+i);
             List <dataanalysis> list =dataService.list(queryWrapper);

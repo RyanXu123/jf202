@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -22,31 +20,23 @@ public class aidisplay_202_controller {
     @RequestMapping("/getData/202/aidisplay")
     @ResponseBody
 //    @Scheduled(fixedRate = 30000)
-    public List<Map<String,Object>> getdata202_ai(){
+    public List<String> aidisplay(){
         String sql="select * from aidisplay";
         List <Map<String,Object>> list=jdbc.queryForList(sql);
-        List <Map<String,Object>> list_all=new ArrayList<>();
-        Map<String,Object> ai= new HashMap<>();
-//        List Content= new ArrayList<>();
-//        List Detail = new ArrayList<>();
-
-        Map<String,Object> Content= new LinkedHashMap<>();//按读入顺序返回数据
-        Map<String,Object> Detail= new LinkedHashMap<>();
+        List<String> ret=new ArrayList<>();
+        LinkedHashMap<String,Object> ai= new LinkedHashMap<>();
 
         for(Map<String,Object> c:list){
-            Object Contents=c.get("Contents");
+//            Object Contents=c.get("Contents");
             Object Details=c.get("Detail");
-            String params =(c.get("Params")).toString();
-            Content.put(params,Contents);
-            Detail.put(params,Details);
+//            String params =(c.get("Params")).toString();
+            ret.add(Details.toString());
         }
-//        Collections.reverse(Content);
-//        Collections.reverse(Content);
-        ai.put("AI状态参数",Content);
-        ai.put("AI状态详情",Detail);
-        list_all.add(ai);
-//        Collections.reverse(list_all);
-        return list_all;
+
+        return ret;
     }
+
+
+
 
 }
