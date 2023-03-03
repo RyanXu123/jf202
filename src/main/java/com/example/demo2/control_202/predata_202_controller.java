@@ -3,7 +3,6 @@ package com.example.demo2.control_202;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +14,6 @@ import java.util.Map;
 
 @Controller
 public class predata_202_controller {
-
     @Autowired
     private JdbcTemplate jdbc;
     @CrossOrigin
