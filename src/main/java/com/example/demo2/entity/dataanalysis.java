@@ -9,6 +9,7 @@ public class dataanalysis {
     @TableId
     private String Equipment;
     private String Location;
+    private Integer id;
     private double SF1;
     private double SF4;
     private double HF1;

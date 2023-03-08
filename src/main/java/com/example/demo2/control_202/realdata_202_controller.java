@@ -872,23 +872,15 @@ public class realdata_202_controller {
                 cold_all1.put(c.get("SiteName").toString(),c.get("Value0"));
             }
         }
+
         List <Map<String,Object>> list_data= new ArrayList<>();  //储存返回的json
-        Map<String, Object> data = new HashMap<String, Object>();
-
         List<String> server = Arrays.asList("A","B","C","D","E","F","G","H","J","K","L","M","N","P");
-//        String sql="select Value0 from realdata_once where Location='JF202' and Equipment='服务器A' and SiteName='A1-上' limit 0,1";
-
         String sql1="select * from realdata_once where Location='JF202' and Equipment='服务器'";
 
         Map<String, Object> servers_cold= new TreeMap<>();  //所有列列服务器冷通道
-        Map<String, Object> servers_hot= new TreeMap<>();  //某列服务器冷通道
-        Map<String, Object> servers_power= new TreeMap<>();  //某列服务器冷通道
         Integer siteNum=23;
-
         Map<String, Object> server_temp_power = new TreeMap<>();  //某列服务器功率 放在服务器外面，包裹所有服务器
         for (String c:server) {  //遍历服务器 c为（"A","B","C","D" ...）
-
-//            List <Map<String,Object>> list1= new jdbc.queryForList(sql1);
             Map<String, Object> server_temp_cold = new TreeMap<>();  //某列服务器冷通道
             Map<String, Object> server_temp_hot = new TreeMap<>();  //某列服务器热通道
 
@@ -897,7 +889,6 @@ public class realdata_202_controller {
             List<Map<String, Object>> list1 = jdbc.queryForList(sql_temp1);
             List<Double> server_site_cold_up = new ArrayList<>(); //某列服务器冷通道上测点
             List<Double> server_site_cold_down = new ArrayList<>();  //某列服务器冷通道下测点
-            List<Double> server_site_hot_all = new ArrayList<>();  //某列服务器热通道测点
             Integer cnt = 0;
             for (Map<String, Object> l : list1) {
                 if(cnt==siteNum*2){
@@ -910,7 +901,7 @@ public class realdata_202_controller {
                     if (cnt % 2 != 0) {//奇数下测点
                         String s= String.format("%.2f", Math.abs(value_before-value0));
                         double d =Double.parseDouble(s);
-                        if(value0>10.0){
+                        if(value0>0.0){
                             d =Double.parseDouble(s);
                         }
                         if (value0==0.0){
@@ -920,7 +911,7 @@ public class realdata_202_controller {
                     } else {
                         String s= String.format("%.2f", Math.abs(value_before-value0));
                         double d =Double.parseDouble(s);
-                        if(value0>10.0){
+                        if(value0>0.0){
                             d =Double.parseDouble(s);
                         }
                         if (value0==0.0){
@@ -966,6 +957,28 @@ public class realdata_202_controller {
         fixed_range=data.get(0);
         fixed_time=data.get(1);
         return data;
+    }
+
+    Integer pre_alert=1;
+    Integer real_alert=0;
+    Integer coldsite_alert=1;
+    @CrossOrigin
+    @PostMapping("/getData/202/realdata/alert_design")
+    @ResponseBody
+    public String alert_design(@RequestBody List<Integer>data ){
+//        List<Double> ret=new ArrayList<>();
+        real_alert=data.get(0);
+        pre_alert=data.get(1);
+        coldsite_alert=data.get(2);
+        return "receive the alert design params";
+    }
+
+    @CrossOrigin
+    @RequestMapping("/getData/202/realdata/alert_design")
+    @ResponseBody
+    public List<Integer> alert_design0(){
+//        List<Double> ret=new ArrayList<>();
+        return Arrays.asList(real_alert,pre_alert,coldsite_alert);
     }
 
     Double alert_time_compare= fixed_time*2;
@@ -1039,8 +1052,29 @@ public class realdata_202_controller {
             alert_time_compare=0.0;
         }
 //        b.add(now);
-        b.add(pre);
-        b.add(cold_list);
+
+
+
+
+
+        List<List<String>> temp= new ArrayList<>();
+        if(real_alert==1){//实时报警
+            b.add(temp);
+        }else{
+            b.add(temp);
+        }
+        if (pre_alert==1){//预控报警
+            b.add(pre);
+        }else{
+            b.add(temp);
+        }
+
+        if(coldsite_alert==1){//波动报警
+            b.add(cold_list);
+        }else{
+            b.add(temp);
+        }
+
         return b;
     }
 
