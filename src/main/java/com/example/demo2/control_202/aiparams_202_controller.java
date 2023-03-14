@@ -85,7 +85,7 @@ public class aiparams_202_controller {
 
 
     @CrossOrigin
-    @RequestMapping("/202/AI_data")
+    @RequestMapping("/AI_data")
     @ResponseBody
 //    @Scheduled(fixedRate = 30000)
     public Map<String,Object> params(){
@@ -94,15 +94,12 @@ public class aiparams_202_controller {
 //        m.put("AI预控控制范围","2℃");
         m.put("AI群控控制范围",ai_range);
         m.put("AI群控控制周期",ai_time);
-//        if(Safe=="0" & Enengy== "0"){
-//            m.put("AI控制状态","无");
-//        }else if(Safe=="1" & Enengy== "0"){
-//            m.put("AI控制状态","安全");
-//        }else if(Safe=="1" & Enengy== "1"){
-//            m.put("AI控制状态","节能且安全");
-//        }
-//        m.put("安全",Safe);
+        m.put("送风上阈值",23);
+        m.put("送风下阈值",23);
+        m.put("送风调整梯度",Arrays.asList(0.3,0.5,0.8,1.0));
+        m.put("冷通道分段阈值",Arrays.asList(Arrays.asList(22,23),Arrays.asList(21,22),Arrays.asList(19,21),Arrays.asList(0,19)));
         m.put("安全和节能",Safe);
+        m.put("一键恢复",0);
 
         return m;
     }

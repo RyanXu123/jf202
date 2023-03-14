@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
     @Controller
-    public class dataanalysis0_202_controller {
+    public class dataanalysis_202_controller {
         @Autowired
         dataanalysisKtService dataService;
         @Autowired
