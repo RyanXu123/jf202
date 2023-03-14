@@ -20,19 +20,26 @@ public class aidisplay_202_controller {
     @RequestMapping("/getData/202/aidisplay")
     @ResponseBody
 //    @Scheduled(fixedRate = 30000)
-    public List<String> aidisplay(){
+    public Map<String,Object> aidisplay(){
         String sql="select * from aidisplay";
         List <Map<String,Object>> list=jdbc.queryForList(sql);
-        List<String> ret=new ArrayList<>();
+       Map<String,Object> ret= new HashMap<>();
         LinkedHashMap<String,Object> ai= new LinkedHashMap<>();
 
-        for(Map<String,Object> c:list){
-//            Object Contents=c.get("Contents");
-            Object Details=c.get("Detail");
-//            String params =(c.get("Params")).toString();
-            ret.add(Details.toString());
-        }
+        List <String> jf_hot= new ArrayList<>();
 
+        for(Map<String,Object> c:list){
+            Object Details = new Object();
+            Details=c.get("Detail");
+            if(c==list.get(0)){
+                ret.put("AI启停状态",Details.toString());
+            }else if(c== list.get(list.size()-1)){
+                ret.put("机房状态",jf_hot);
+                ret.put("AI触发模块",Details.toString());
+            }else{
+                jf_hot.add(Details.toString());
+            }
+        }
         return ret;
     }
 

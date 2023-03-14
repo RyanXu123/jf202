@@ -19,7 +19,7 @@ public class precmd_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/precmd")
     @ResponseBody
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public List<Map<String,Object>> getdata202_pre(){ //按服务器和空调变化状态给数据
 
         String sql="select * from precmd where Location='JF202'";

@@ -3,8 +3,8 @@ package com.example.demo2.control_203;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.demo2.dto.KtDto;
-import com.example.demo2.entity.dataanalysis;
-import com.example.demo2.service.dataanalysisService;
+import com.example.demo2.entity.dataanalysis_kt;
+import com.example.demo2.service.dataanalysisKtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -16,7 +16,7 @@ import java.util.*;
 @Controller
 public class dataanalysis0_203_controller {
     @Autowired
-    dataanalysisService dataService;
+    dataanalysisKtService dataService;
 
     @CrossOrigin
     @RequestMapping("/getData/203/dataanalysisnew")
@@ -29,9 +29,9 @@ public class dataanalysis0_203_controller {
 
         LinkedList<String> Time_line= new LinkedList<>();
         for (int i = 1; i < 13; i++) {
-            LambdaQueryWrapper<dataanalysis> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(dataanalysis::getEquipment , "KT"+i);
-            List <dataanalysis> list =dataService.list(queryWrapper);
+            LambdaQueryWrapper<dataanalysis_kt> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(dataanalysis_kt::getEquipment , "KT"+i);
+            List <dataanalysis_kt> list =dataService.list(queryWrapper);
             KtDto dto = new KtDto();
             List<Double> SFD = new LinkedList<>();
             List<Double> SF1 = new LinkedList<>();
@@ -60,7 +60,7 @@ public class dataanalysis0_203_controller {
             dto.setYSJ2(YSJ2);
             dto.setPower(power);
 
-            for(dataanalysis kt : list){
+            for(dataanalysis_kt kt : list){
                 SFD.add(kt.getSFD());
                 SF1.add(kt.getSF1());
                 SF4.add(kt.getSF4());

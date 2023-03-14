@@ -1,6 +1,9 @@
 package com.example.demo2.control_202;
 
 
+import com.example.demo2.entity.alert;
+import com.example.demo2.mapper.alertMapper;
+import com.example.demo2.service.alertService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,6 +18,7 @@ public class realdata_202_controller {
     @Autowired
     private JdbcTemplate jdbc;
 
+    alertService alertservice;
 
     @CrossOrigin
     @RequestMapping("/getData/202/realtime/serverpower")
@@ -985,11 +989,11 @@ public class realdata_202_controller {
     Map<Integer,String> alert_content = new HashMap<>();
 
     @CrossOrigin
-    @RequestMapping("/getData/202/alert")
+    @RequestMapping("/getData/202/alertold")
     @ResponseBody
-    public List<List<List<String>>> alert(){
+    public Map<String,Object> alert(){
 
-        List<List<List<String>>> b= new ArrayList<>();
+        Map<String,Object> b= new HashMap<>();
         List<List<String>> now= new ArrayList<>();
         List<List<String>> pre= new ArrayList<>();
         List<List<String>> cold_list= new ArrayList<>();
@@ -1057,25 +1061,122 @@ public class realdata_202_controller {
 
 
 
+//        List<List<String>> temp= new ArrayList<>();
+//        if(real_alert==1){//实时报警
+//            b.add(temp);
+//        }else{
+//            b.add(temp);
+//        }
+//        if (pre_alert==1){//预控报警
+//            b.add(pre);
+//        }else{
+//            b.add(temp);
+//        }
+//
+//        if(coldsite_alert==1){//波动报警
+//            b.add(cold_list);
+//        }else{
+//            b.add(temp);
+//        }
+
+        return b;
+    }
+
+
+    @CrossOrigin
+    @RequestMapping("/getData/202/alert")
+    @ResponseBody
+    public Map<String,Object> alert2(){
+
+
+        Map<String,Object> b= new HashMap<>();
+        List<List<String>> now= new ArrayList<>();
+        List<List<String>> pre= new ArrayList<>();
+        List<List<String>> cold_list= new ArrayList<>();
+
+        String sql2="select * from predata where PointName='冷通道最大温度' ORDER BY id DESC limit 0,7"; //预测警告
+
+        List <Map<String,Object>> list2=jdbc.queryForList(sql2);
+        for (Map<String,Object> m:list2){
+            if(Double.parseDouble(m.get("Value0").toString())>= (double)cold_range.get(1)){
+                pre.add(Arrays.asList(m.get("time").toString(),m.get("Equipment").toString().substring(3),m.get("PointName").toString()+"为"+m.get("Value0")+"°C"));
+            }
+        }
+
+        alert_time_compare+=1;
+        String sql=" select * from realdata_once where Location='JF202' and PointName='冷通道温度' ";
+        List <Map<String,Object>> cold_temp_all=jdbc.queryForList(sql);
+        if( cold_all2.isEmpty()){ //第一次导入所有测点数据
+            for(Map<String,Object> c :cold_temp_all ){
+                cold_all2.put(c.get("SiteName").toString(),c.get("Value0"));
+            }
+        }
+//        List<Map <String,Object> >cold_record = new ArrayList<>();
+//        Map <String,Object>  cold_record_temp= new HashMap<>();
+        Integer id=1;
+        for(Map<String,Object>cold: cold_temp_all){
+            Double value0= (double) cold.get("Value0");
+            String SiteName= cold.get("SiteName").toString();
+            Double value_before=Double.parseDouble(cold_all2.get(SiteName).toString());
+
+            if(Math.abs(value0-value_before)>fixed_range){
+                String temp= cold.get("Equipment").toString().substring(3)+cold.get("SiteName").toString().substring(1)+"波动"+String.format("%.2f",Math.abs(value0-value_before))+"度";
+                cold_list.add(Arrays.asList(id.toString(),cold.get("time").toString(),cold.get("Equipment").toString().substring(3),cold.get("SiteName").toString()+"波动"+String.format("%.2f",Math.abs(value0-value_before))+"度"));
+            }
+            id++;
+        }
+
+
+        if (alert_time_compare>fixed_time*2){  //时间间隔为设置的间隔整数倍，则更新前fixed_time的测点温度
+                for(Map<String,Object> c :cold_temp_all ){//更新上一时刻测点温度
+                    cold_all2.put(c.get("SiteName").toString(),c.get("Value0"));
+                }
+                alert_time_compare=0.0;
+        }
+//        b.add(now);
+
+
+
+
+
+
         List<List<String>> temp= new ArrayList<>();
         if(real_alert==1){//实时报警
-            b.add(temp);
+            b.put("real_hot",temp);
         }else{
-            b.add(temp);
+            b.put("real_hot",temp);
         }
         if (pre_alert==1){//预控报警
-            b.add(pre);
+            b.put("pre_hot",pre);
         }else{
-            b.add(temp);
+            b.put("pre_hot",temp);
         }
 
         if(coldsite_alert==1){//波动报警
-            b.add(cold_list);
+            b.put("cold_change",cold_list);
         }else{
-            b.add(temp);
+            b.put("cold_change",temp);
+            for (List<String> i:temp){
+                alert alert0 = new alert();
+                alert0.setContent(i.get(3));
+                alert0.setEquipment(i.get(2));
+                alert0.setLocation("FT202");
+                alert0.setSampleTime(i.get(1));
+                alertservice.save(alert0);
+//                alert0.setEquipment(i.get(2));
+            }
         }
 
         return b;
+    }
+
+
+    @CrossOrigin
+    @RequestMapping("/getData/202/alert_history")
+    @ResponseBody
+    public Map<String,Object> alert_history(){
+
+        return new HashMap<>();
     }
 
 

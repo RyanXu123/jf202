@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 
-public class dataanalysis {
+public class dataanalysis_kt {
     @TableId
     private String Equipment;
     private String Location;
@@ -24,5 +24,7 @@ public class dataanalysis {
     private double FJ2;
     private double YSJ1;
     private double YSJ2;
+    private double LNFJ1;
+    private double LNFJ2;
     private String SampleTime;
 }

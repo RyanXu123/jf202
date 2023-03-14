@@ -68,7 +68,7 @@ public class aiparams_202_controller {
     public List<String> aicontrol1(){
         List ret= new ArrayList<>();
 
-        ret.add(Enengy);
+//        ret.add(Enengy);
         ret.add(Safe);
         return  ret;
     }
@@ -78,8 +78,8 @@ public class aiparams_202_controller {
     @ResponseBody
 //    @Scheduled(fixedRate = 30000)
     public List<Integer> aicontrol2(@RequestBody List<Integer> data){
-        Safe=data.get(1).toString();  //保存更改的ai控制状态数据
-        Enengy=data.get(0).toString(); //保存更改的ai控制状态数据
+        Safe=data.get(0).toString();  //保存更改的ai控制状态数据
+//        Enengy=data.get(0).toString(); //保存更改的ai控制状态数据
         return  data;
     }
 
@@ -101,8 +101,8 @@ public class aiparams_202_controller {
 //        }else if(Safe=="1" & Enengy== "1"){
 //            m.put("AI控制状态","节能且安全");
 //        }
-        m.put("安全",Safe);
-        m.put("节能",Enengy);
+//        m.put("安全",Safe);
+        m.put("安全和节能",Safe);
 
         return m;
     }

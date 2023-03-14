@@ -18,5 +18,7 @@ public class KtDto {
     private List<Double> FJ2;
     private List<Double> YSJ1;
     private List<Double> YSJ2;
+    private List<Double> LNFJ1;
+    private List<Double> LNFJ2;
     private List<Double> Power;
 }
