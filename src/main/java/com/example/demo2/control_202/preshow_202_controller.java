@@ -257,7 +257,7 @@ public class preshow_202_controller {
 //    @Scheduled(fixedRate = 30000)
     public Map<String,Object> preshow3() {//一个时刻68个数据
 
-        String sql_power="select * from predata where Equipment='服务器AB' and Location='JF202' and PointName='服务器功率'  ORDER BY id DESC limit 0,10080";
+        String sql_power="select * from predata where Equipment='服务器AB' and Location='JF202' and PointName='服务器功率'  ORDER BY id DESC limit 0,1440";
 
         List <String>timeline_arr= new ArrayList<>();
         List<String> power_arr = new ArrayList<>();
@@ -270,7 +270,7 @@ public class preshow_202_controller {
 
 
 
-        String sql_power_now="select * from preshow where Equipment='服务器AB' and Location='JF202' and PointName='服务器功率'  and Value0>0.0 ORDER BY id DESC limit 0,10080";
+        String sql_power_now="select * from preshow where Equipment='服务器AB' and Location='JF202' and PointName='服务器功率'  and Value0>0.0 ORDER BY id DESC limit 0,1440";
         List<String> power_arr_now = new ArrayList<>();
         List<Map<String, Object>> list_power_now = jdbc.queryForList(sql_power_now);
         Integer cnt=0;
@@ -282,10 +282,6 @@ public class preshow_202_controller {
         }
         Collections.reverse(power_arr_now);
         Collections.reverse(timeline_arr);
-
-
-        Map<String,Object> pre= new HashMap<>();
-        Map<String,Object> real= new HashMap<>();
         Map<String,Object> ret= new HashMap<>();
 
         ret.put("pre",power_arr);

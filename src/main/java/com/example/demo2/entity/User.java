@@ -7,7 +7,7 @@ import lombok.Data;
 public class User {
     @TableId
     private Integer id;
-    private String LoginName;
+    private String Role;
     private String UserName;
-    private String PassWord;
+    private String Password;
 }

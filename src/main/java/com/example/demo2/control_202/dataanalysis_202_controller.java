@@ -213,12 +213,16 @@ import java.util.*;
                 if(!time_start.equals("-1")){
                     andWrapper.eq(dataanalysis_kt::getEquipment , "KT"+Equipment).ge(dataanalysis_kt::getSampleTime,time_start).lt(dataanalysis_kt::getSampleTime,time_end);
                 }else{
-                    andWrapper.eq(dataanalysis_kt::getEquipment , "KT"+Equipment).ge(dataanalysis_kt::getSampleTime,time_start);
+                    andWrapper.eq(dataanalysis_kt::getEquipment , "KT"+Equipment).last("limit 1440");
                 }
 
             }else if(type.equals("server")){
                 LambdaQueryWrapper<dataanalysis_server> serverWrapper = new LambdaQueryWrapper<>();
-                serverWrapper.eq(dataanalysis_server::getEquipment , "server-"+Equipment).ge(dataanalysis_server::getSampleTime,time_start);
+                if(!time_start.equals("-1")){
+                    serverWrapper.eq(dataanalysis_server::getEquipment , "server-"+Equipment).ge(dataanalysis_server::getSampleTime,time_start).lt(dataanalysis_server::getSampleTime,time_end);
+                }else{
+                    serverWrapper.eq(dataanalysis_server::getEquipment , "server-"+Equipment).last("limit 1440");
+                }
                 List<dataanalysis_server> list2= serverService.list(serverWrapper);
 //                System.out.println(list2);
                 List<Double> server_all = new ArrayList<>();

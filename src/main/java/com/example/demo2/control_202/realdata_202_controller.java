@@ -1,14 +1,22 @@
 package com.example.demo2.control_202;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.demo2.entity.alert;
+import com.example.demo2.entity.dataanalysis_kt;
+import com.example.demo2.entity.sitecold;
 import com.example.demo2.mapper.alertMapper;
+import com.example.demo2.mapper.sitecoldMapper;
 import com.example.demo2.service.alertService;
+import com.example.demo2.service.sitecoldService;
+import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+//import com.example.demo2.control_202.coldsite_updata.*;
 
 import java.sql.Time;
 import java.util.*;
@@ -19,7 +27,15 @@ public class realdata_202_controller {
     @Autowired
     private JdbcTemplate jdbc;
 
+    @Autowired
     alertService alertservice;
+
+    @Autowired(required=false)
+    sitecoldService scService;
+
+//    coldsite_updata_controller cuc = new coldsite_updata_controller();
+
+
 
     @CrossOrigin
     @RequestMapping("/getData/202/realtime/serverpower")
@@ -744,8 +760,6 @@ public class realdata_202_controller {
     }
 
 
-
-
     @CrossOrigin
     @RequestMapping("/getData/202/realdata/server_diagnosis")
     @ResponseBody
@@ -785,107 +799,39 @@ public class realdata_202_controller {
         return list_temp;
     }
 
-//    @CrossOrigin
-//    @RequestMapping("/getData/202/realdata/coldsite_change0")
-//    @ResponseBody
-//    public Map<String,Object> coldsite_change0(){
-//
-//        String sql=" select Value0,SiteName from realdata_once where Location='JF202' and PointName='冷通道温度' ";
-//        List <Map<String,Object>> cold_temp_all=jdbc.queryForList(sql);
-//        if( cold_all.isEmpty()){ //第一次导入所有测点数据
-//            for(Map<String,Object> c :cold_temp_all ){
-//                cold_all.put(c.get("SiteName").toString(),c.get("Value0"));
-//            }
-//        }
-//        Map<String,Object> coldsite_map=new HashMap<>();
-//        List <Map<String,Object>> list_all= new ArrayList<>();
-//        List<String> server = Arrays.asList("A","B","C","D","E","F","G","H","J","K","L","M","N","P");
-//        String sql20_sf=" select * from realdata_once where Location='JF202' and Equipment='服务器'";  //从表中筛选某空调的所有参数
-//        Map<String,Object> server_site = new HashMap<>();
-//        Map<Integer,String> cold_up_test = new TreeMap<>();
-//        Map<Integer,String> cold_down_test = new TreeMap<>();
-//
-//        for(String c:server){
-//            Integer siteNum=23;
-//            String sql_temp=sql20_sf.replace("服务器","服务器"+c);
-//            List <Map<String,Object>> list_cold=jdbc.queryForList(sql_temp);
-//
-//
-//            Integer siteNow=0;
-//
-//            for (Map<String,Object> site:list_cold){
-//                if(siteNow==siteNum*2){
-//                    break;
-//                }
-//                String SiteName=site.get("SiteName").toString();
-//                double value2=Double.parseDouble(String.format("%.2f",(double)site.get("Value0")));
-//                double value_before =Double.parseDouble(cold_all.get(SiteName).toString());
-//                if(siteNow<siteNum*2){//冷通道测点
-//                    if(siteNow%2==0){//上测点
-//                        String temp=String.format("%.2f",Math.abs(value_before-value2));
-//                        if(value2>10.0) {
-//                            temp=String.format("%.2f",Math.abs(value_before-value2));
-//                        }
-//                        if(value2<=0.0){
-//                            temp="-1.0";
-//                        }
-//                        cold_up_test.put(siteNow/2,temp);//与五分钟前的差值
-//
-//                    }else if(siteNow%2==1){
-//                        String temp=String.format("%.2f",Math.abs(value_before-value2));
-//                        if(value2>10.0) {
-//                            temp=String.format("%.2f",Math.abs(value_before-value2));
-//                        }
-//                        if(value2<=0.0){
-//                            temp="-1.0";
-//                        }
-//                        cold_down_test.put(siteNow/2,temp);//与五分钟前的差值
-//                    }
-//                }
-//                siteNow+=1;
-//            }
-//            server_site.put("up",cold_up_test);
-//            server_site.put("down",cold_down_test);
-//            coldsite_map.put(c,server_site);
-//        }
-//
-//
-//        coldSite_time_compare+=1;
-//        if (coldSite_time_compare > fixed_time*2){
-//            for(Map<String,Object> c :cold_temp_all ){//更新上一时刻测点温度
-//                cold_all.put(c.get("SiteName").toString(),c.get("Value0"));
-//            }
-//            coldSite_time_compare=0.0;
-//        }
-//        return coldsite_map;
-//    }
 
     Double fixed_time=10.0;
     Double fixed_range=3.0;
-    Map<String,Object> cold_all_show= new HashMap<>();
-    Map<String,Object> cold_all2= new HashMap<>();
-    Long calendar_start = Calendar.getInstance().getTimeInMillis();
+//    Map<String,Object> cold_all_show= new HashMap<>();
+//    Map<String,Object> cold_all2= new HashMap<>();
+//    Long calendar_start = Calendar.getInstance().getTimeInMillis();
 
+    List<List<String>> cold_list= new ArrayList<>();
+    Integer start_flag=0;
+//    public Map<String,Object> cold_all_show= new HashMap<>();
     @CrossOrigin
     @RequestMapping("/getData/202/realdata/coldsite_change")
     @ResponseBody
     public List<Map<String,Object>> coldsite_change(){
 
-        String sql=" select Value0,SiteName from realdata_once where Location='JF202' and PointName='冷通道温度' ";
-        List <Map<String,Object>> cold_temp_all=jdbc.queryForList(sql);
-        if( cold_all_show.isEmpty()){ //第一次导入所有测点数据
-            for(Map<String,Object> c :cold_temp_all ){
-                cold_all_show.put(c.get("SiteName").toString(),c.get("Value0"));
-            }
-        }
 
         List <Map<String,Object>> list_data= new ArrayList<>();  //储存返回的json
         List<String> server = Arrays.asList("A","B","C","D","E","F","G","H","J","K","L","M","N","P");
+        Collections.reverse(server);//从P开始排序
         String sql1="select * from realdata_once where Location='JF202' and Equipment='服务器'";
 
+        List <sitecold> list_sitecold= sitecoldmapper.selectList(null);
+//        String sql=" select * from realdata_once where Location='JF202' and PointName='冷通道温度' ";
+//        List <Map<String,Object>> cold_temp_all=jdbc.queryForList(sql);
+
+
+        Iterator<sitecold> cold_before_all = list_sitecold.iterator();
+//        Iterator<Map<String,Object>> cold_all = cold_temp_all.iterator();
+//        cold_list.clear();
         Map<String, Object> servers_cold= new TreeMap<>();  //所有列列服务器冷通道
         Integer siteNum=23;
-        Map<String, Object> server_temp_power = new TreeMap<>();  //某列服务器功率 放在服务器外面，包裹所有服务器
+
+//        Integer id=0;
         for (String c:server) {  //遍历服务器 c为（"A","B","C","D" ...）
             Map<String, Object> server_temp_cold = new TreeMap<>();  //某列服务器冷通道
 
@@ -893,16 +839,21 @@ public class realdata_202_controller {
             List<Map<String, Object>> list1 = jdbc.queryForList(sql_temp1);
             List<Double> server_site_cold_up = new ArrayList<>(); //某列服务器冷通道上测点
             List<Double> server_site_cold_down = new ArrayList<>();  //某列服务器冷通道下测点
-            Integer cnt = 0;
-            for (Map<String, Object> l : list1) {
-                if(cnt==siteNum*2){
+
+            Integer cnt_change_site = 0;
+
+            for (Map<String, Object> l : list1) {//遍历每个服务器的测点
+
+                if(cnt_change_site==siteNum*2){
                     break;
                 }
                 String SiteName= l.get("SiteName").toString();
                 Double value0 = (double) l.get("Value0");
-                Double value_before= Double.parseDouble(cold_all_show.get(SiteName).toString());
-                if (cnt < siteNum * 2) {
-                    if (cnt % 2 != 0) {//奇数下测点
+//                Double value_before= Double.parseDouble(cold_all_show.get(SiteName).toString());
+                Double value_before=cold_before_all.next().getGapValue();
+                if (cnt_change_site < siteNum * 2) {
+
+                    if (cnt_change_site % 2 != 0) {//奇数下测点
                         String s= String.format("%.2f", Math.abs(value_before-value0));
                         double d =Double.parseDouble(s);
                         if(value0>0.0){
@@ -923,7 +874,7 @@ public class realdata_202_controller {
                         }
                         server_site_cold_up.add(d);//冷下 1 3 5 7
                     }
-                    cnt++;
+                    cnt_change_site++;
                 }
                 Map<String, Object> site_cold = new TreeMap<>(); //冷通道
                 site_cold.put("up", server_site_cold_up); //某列服务器所有上测点  （up，{服务器所有测点（1，22）（2，22）..}）
@@ -933,15 +884,7 @@ public class realdata_202_controller {
         }
         list_data.add(servers_cold);
 
-//        System.out.println(Double.parseDouble(Calendar.getInstance().getTime().toString()));
-        System.out.println(Calendar.getInstance().getTimeInMillis());
-//        System.out.println(Calendar.getInstance().toString());
-        if (Calendar.getInstance().getTimeInMillis()-calendar_start> 10000){//满足3min
-            for(Map<String,Object> c :cold_temp_all ){//更新上一时刻测点温度
-                cold_all_show.put(c.get("SiteName").toString(),c.get("Value0"));
-            }
-            calendar_start=Calendar.getInstance().getTimeInMillis();
-        }
+
         return list_data;
     }
 
@@ -965,13 +908,13 @@ public class realdata_202_controller {
         return data;
     }
 
-    Integer pre_alert=1;
-    Integer real_alert=0;
-    Integer coldsite_alert=1;
+    Boolean pre_alert=false;
+    Boolean real_alert=false;
+    Boolean coldsite_alert=false;
     @CrossOrigin
     @PostMapping("/getData/202/realdata/alert_design")
     @ResponseBody
-    public String alert_design(@RequestBody List<Integer>data ){
+    public String alert_design(@RequestBody List<Boolean>data ){
 //        List<Double> ret=new ArrayList<>();
         real_alert=data.get(0);
         pre_alert=data.get(1);
@@ -982,23 +925,28 @@ public class realdata_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/realdata/alert_design")
     @ResponseBody
-    public List<Integer> alert_design0(){
+    public List<Boolean> alert_design0(){
 //        List<Double> ret=new ArrayList<>();
         return Arrays.asList(real_alert,pre_alert,coldsite_alert);
     }
 
     Map<Integer,String> alert_content = new HashMap<>();
-
+    @Autowired
+    private sitecoldMapper sitecoldmapper;
+    Integer cnt=0;
     @CrossOrigin
     @RequestMapping("/getData/202/alert")
     @ResponseBody
     public Map<String,Object> alert2(){
 
-
         Map<String,Object> b= new HashMap<>();
         List<List<String>> now= new ArrayList<>();
         List<List<String>> pre= new ArrayList<>();
         List<List<String>> cold_list= new ArrayList<>();
+        List <sitecold> list_sitecold= sitecoldmapper.selectList(null);
+
+//        <sitecold> find_list = new LambdaQueryWrapper<>();
+//        find_list.allEq(null);
 
         String sql2="select * from predata where PointName='冷通道最大温度' ORDER BY id DESC limit 0,7"; //预测警告
 
@@ -1011,61 +959,48 @@ public class realdata_202_controller {
 
         String sql=" select * from realdata_once where Location='JF202' and PointName='冷通道温度' ";
         List <Map<String,Object>> cold_temp_all=jdbc.queryForList(sql);
-        if( cold_all_show.isEmpty()){ //第一次导入所有测点数据
-            for(Map<String,Object> c :cold_temp_all ){
-                cold_all_show.put(c.get("SiteName").toString(),c.get("Value0"));
-            }
-        }
+
 
         Integer id=1;
-        for(Map<String,Object>cold: cold_temp_all){
+        Iterator<sitecold> cold_before_all = list_sitecold.iterator();
+        Iterator<Map<String,Object>> cold_all = cold_temp_all.iterator();
+
+        while(cold_all.hasNext() && cold_before_all.hasNext()){
+            sitecold cold_before = cold_before_all.next();
+            Map<String,Object> cold= cold_all.next();
+
             Double value0= (double) cold.get("Value0");
             String SiteName= cold.get("SiteName").toString();
-            Double value_before=Double.parseDouble(cold_all_show.get(SiteName).toString());
-
+//            Double value_before=Double.parseDouble(cuc.cold_all_show.get(SiteName).toString());
+            Double value_before=(double) cold_before.getGapValue();
             if(Math.abs(value0-value_before)>fixed_range){
-               cold_list.add(Arrays.asList(id.toString(),cold.get("time").toString(),cold.get("Equipment").toString().substring(3),cold.get("SiteName").toString()+"波动"+String.format("%.2f",Math.abs(value0-value_before))+"度"));
+                cold_list.add(Arrays.asList(id.toString(),cold.get("time").toString(),cold.get("Equipment").toString().substring(3),cold.get("SiteName").toString()+"波动"+String.format("%.2f",Math.abs(value0-value_before))+"度"));
+                cold_list.add(Arrays.asList(id.toString(),cold.get("time").toString(),cold.get("Equipment").toString().substring(3),cold.get("SiteName").toString()+"波动"+String.format("%.2f",Math.abs(value0-value_before))+"度"));
+                alert alert0 = new alert();
+                alert0.setContent(cold.get("SiteName").toString()+"波动"+Math.abs(value0-value_before)+"度");
+                alert0.setEquipment(cold.get("Equipment").toString().substring(3));
+                alert0.setLocation("FT202");
+                alert0.setSampleTime(cold.get("time").toString());
+                alertservice.save(alert0);
             }
             id++;
         }
 
-
-        if (Calendar.getInstance().getTimeInMillis()-calendar_start > 10000){  //时间间隔为设置的间隔整数倍，则更新前fixed_time的测点温度 //数据获取次数判断而非时间 说明获取频率高，并且两个数组所以警告和图况不一致
-                for(Map<String,Object> c :cold_temp_all ){//更新上一时刻测点温度
-                    cold_all_show.put(c.get("SiteName").toString(),c.get("Value0"));
-                }
-            calendar_start=Calendar.getInstance().getTimeInMillis();
-        }
-//        b.add(now);
-
-
-
-
-
-
         List<List<String>> temp= new ArrayList<>();
-        if(real_alert==1){//实时报警
+        if(real_alert==true){//实时报警
             b.put("real_hot",temp);
         }else{
             b.put("real_hot",temp);
         }
-        if (pre_alert==1){//预控报警
+        if (pre_alert==true){//预控报警
             b.put("pre_hot",pre);
         }else{
             b.put("pre_hot",temp);
         }
 
-        if(coldsite_alert==1){//波动报警
+        if(coldsite_alert==true){//波动报警
             b.put("cold_change",cold_list);
-            for (List<String> i:cold_list){
-                alert alert0 = new alert();
-                alert0.setContent(i.get(3));
-                alert0.setEquipment(i.get(2));
-                alert0.setLocation("FT202");
-                alert0.setSampleTime(i.get(1));
-                alertservice.save(alert0);
-//                alert0.setEquipment(i.get(2));
-            }
+//            cold_list.clear();
         }else{
             b.put("cold_change",temp);
 
@@ -1078,9 +1013,12 @@ public class realdata_202_controller {
     @CrossOrigin
     @RequestMapping("/getData/202/alert_history")
     @ResponseBody
-    public Map<String,Object> alert_history(){
-
-        return new HashMap<>();
+    public List<alert> alert_history(){
+        LambdaQueryWrapper<alert> andWrapper = new LambdaQueryWrapper<>();
+        andWrapper.last("limit 1000");
+        List <alert> list =alertservice.list(andWrapper);
+//        return new HashMap<>();
+        return list;
     }
 
 
