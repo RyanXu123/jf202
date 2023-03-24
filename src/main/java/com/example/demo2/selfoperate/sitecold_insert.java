@@ -30,7 +30,7 @@ public class sitecold_insert implements ApplicationRunner {
     public  void run(ApplicationArguments args) throws Exception{
         Integer cnt=0;
         while(true){
-            System.out.println("test");
+//            System.out.println("test");
             List<sitecold> list_site_cold= new ArrayList<>();
 //            sitecold sc= new sitecold();
 
@@ -56,7 +56,7 @@ public class sitecold_insert implements ApplicationRunner {
                     sitecoldmapper.update(null,updatawrapper);
                 }
             }
-            Thread.sleep(10000);
+            Thread.sleep(60000);
         }
     }
 
