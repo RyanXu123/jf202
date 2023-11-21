@@ -36,22 +36,6 @@ public class realdata_202_controller {
 //    coldsite_updata_controller cuc = new coldsite_updata_controller();
 
 
-
-    @CrossOrigin
-    @RequestMapping("/getData/202/realtime/serverpower")
-    @ResponseBody
-//    @Scheduled(fixedRate = 30000)
-    public List<Map<String,Object>> getdata202_serverpower(){
-        String sql="select * from realdata_once where Location='JF202'  and PointName='服务器功率' order by Equipment";
-        List <Map<String,Object>> list=jdbc.queryForList(sql);
-        return list;
-    }
-
-
-
-
-
-
     Map<Integer,List<Double>> kt_hf = new HashMap<>();
     Map<Integer,List<Double>> kt_sf = new HashMap<>();
 
@@ -62,7 +46,7 @@ public class realdata_202_controller {
     public List<Map<String,Object>> getdata202_judge3(){
 
         List <Map<String,Object>> list_all= new ArrayList<>();
-        String sql20_sf=" select PointName,Equipment,Value0 from realdata_once where Location='JF202' and Equipment='空调0'";  //从表中筛选某空调的所有参数
+        String sql20_sf=" select PointName,Equipment,Value0 from realdata_once where Location='JF202' and Equipment='空调0' limit 0,16";  //从表中筛选某空调的所有参数
         List <Map<String,Object>> list_temp= new ArrayList<>();
         Map<String,Object> a = new HashMap<>();
         Map<Integer,Object> kt_all = new HashMap<>();
@@ -139,7 +123,7 @@ public class realdata_202_controller {
 
         //        kt2
         List <Map<String,Object>> list_all= new ArrayList<>();
-        String sql20_sf=" select * from realdata_once where Location='JF202' and Equipment='空调0'";  //从表中筛选某空调的所有参数
+        String sql20_sf=" select * from realdata_once where Location='JF202' and Equipment='空调0' limit 0,16";  //从表中筛选某空调的所有参数
 //        String sql20_sfd=" select Value0,time from realdata_once where Location='JF202' and Equipment='空调0' and PointName='送风温度设定'";
 //        String sql20_hf=" select Value0,time from realdata_once where Location='JF202' and Equipment='空调0' and PointName='回风温度1' ";
 //        String sql20_hfd=" select Value0,time from realdata_once where Location='JF202' and Equipment='空调0' and PointName='回风温度设定'";
@@ -180,6 +164,7 @@ public class realdata_202_controller {
             temp2.put("送风温度1",temp.get("送风温度1"));
             temp2.put("送风温度4",temp.get("送风温度4"));
             temp2.put("空调功率",temp.get("空调功率"));
+            temp2.put("空调开关",temp.get("空调开关"));
             kt_all.put(i,temp2);
         }
 
@@ -194,202 +179,6 @@ public class realdata_202_controller {
 
 
     @CrossOrigin
-    @RequestMapping("/getData/202/realdata/servernew2")
-    @ResponseBody
-//    @Scheduled(fixedRate = 30000)
-    public List<Map<String,Object>> getdata202_p(){
-
-        List <Map<String,Object>> list_data= new ArrayList<>();  //储存返回的json
-        Map<String, Object> data = new HashMap<String, Object>();
-
-        List<String> server = Arrays.asList("A","B","C","D","E","F","G","H","J","K","L","M","N","P");
-        String sql="select Value0 from realdata_once where Location='JF202' and Equipment='服务器A' and SiteName='A1-上' limit 0,1";
-
-        String sql1="select * from realdata_once where Location='JF202' and Equipment='服务器' and SiteName='X1-上' ";
-        String sql2="select * from realdata_once where Location='JF202' and Equipment='服务器' and SiteName='X1-下' ";
-        List list_value= new ArrayList<>();
-        Integer server_num=1;
-        List list_datavalue= new ArrayList<>();
-        List list_name= new ArrayList<>();
-
-        List <Map<String,Object>> list1= new ArrayList<>();
-        List <Map<String,Object>> list2= new ArrayList<>();
-        List <Map<String,Object>> list3= new ArrayList<>();
-        List <Map<String,Object>> list4= new ArrayList<>();
-        Map<String, Object> server_temp = new HashMap<String, Object>();  //服务器冷通道
-        Map<String, Object> server_temp1 = new HashMap<String, Object>();  //服务器热通道
-        Map<String, Object> server_temp2 = new HashMap<String, Object>();  //服务器功率
-
-        for (String c:server){  //遍历服务器 c为（"A","B","C","D" ...）
-            String sql_temp1=sql1.replace("'服务器'","'服务器"+c+"'");
-            String sql_temp2=sql2.replace("'服务器'","'服务器"+c+"'");
-
-
-            Map<Integer, Object> server_site1 =new HashMap<Integer, Object>();  //某列服务器冷通道上测点
-            Map<Integer, Object> server_site2 =new HashMap<Integer, Object>();  //某列服务器冷通道下测点
-            Map<Integer, Object> server_site3 =new HashMap<Integer, Object>();  //某列服务器热通道测点
-
-            Map<String, Object> server_site =new HashMap<String, Object>();  //服务器测点
-            Integer siteNum=23;
-            Double temperature1=0.0;  //某列服务器冷通道上测点温度求和
-            Double temperature2=0.0;  //某列服务器冷通道下测点温度求和
-            Double temperature3=0.0;  //某列服务器热通道测点温度求和
-
-            //遍历并修改测点
-            Integer cntNull1=0;//每组服务器冷通道上非0测点计数
-            Integer cntNull2=0;//每组服务器冷通道下非0测点计数
-            Integer cntNull3=0;//每组服务器热通道非0测点计数
-            for(Integer i=1;i<=siteNum;i++){ //遍历测点
-                String sql_temp11=sql_temp1.replace("'X1","'"+c+i.toString());    //新建变量，否则只能替换第一次，后面X1变成A1
-                String sql_temp22=sql_temp2.replace("'X1","'"+c+i.toString());  //遍历每组服务器的冷通道的每一个侧测点
-                //select Value0 from realdata_once where Location='JF202' and Equipment='服务器A' and SiteName='A1-上'
-                String sql_temp33=sql_temp1.replace("X1-上",i.toString());           //热通道 ，上测点X1-上变为1
-//                String sql_temp44=sql_temp2.replace("X1-下",i.toString());
-
-                list1=jdbc.queryForList(sql_temp11); //查询的某服务器的一条冷通道上测点
-                list2=jdbc.queryForList(sql_temp22);//查询的某服务器的一条冷通道下测点
-                list3=jdbc.queryForList(sql_temp33);//查询的某服务器的一条热通道测点
-//                list4=jdbc.queryForList(sql_temp44);
-
-                String datavalueStr = new String();
-                String sitename = new String();
-                Integer num0 =0 ;
-
-//                temperature1=0.0;
-                for (Map<String,Object> l:list1){//对某服务器某测点的字段取值，去其value0
-
-                    Object temp_value=l.get("Value0"); //取得值
-                    Double datavalue=Double.parseDouble(temp_value.toString());  //变为浮点型
-                    datavalueStr = String.format("%.2f", datavalue); //保留两位小数
-
-                    if (Double.parseDouble(datavalueStr)==0.0){ //统计该上测点是否为零
-                        cntNull1=cntNull1+1;
-                    }
-
-                    temperature1+=Double.parseDouble(datavalueStr);//将该测点加总到某列服务器上测点总和上去
-//                    list_datavalue.add(Double.valueOf(datavalueStr));
-                    Object temp_name1=l.get("SiteName"); //获取该测点的名字
-                    sitename=(temp_name1.toString()); //
-                    int stop_point=sitename.indexOf('-');  //只保留数字部分
-                    String num=sitename.substring(1,stop_point);
-                    num0= new Integer(num);//并变为整数
-                }
-//                server_site1_avg.put("Atop",temperature_all/siteNum)
-                server_site1.put(num0,datavalueStr); //将该测点的名字与数值生成键值对 （A01-上，22.5）=》》（1，22.5）
-
-
-                for (Map<String,Object> l:list2){////测点取值,下
-                    Object temp_value=l.get("Value0");
-                    Double datavalue=Double.parseDouble(temp_value.toString());
-                    datavalueStr = String.format("%.2f", datavalue);
-                    if (Double.parseDouble(datavalueStr)==0.0){ cntNull2=cntNull2+1;}
-//                    list_datavalue.add(Double.valueOf(datavalueStr));
-                    temperature2+=Double.parseDouble(datavalueStr);//A所有下半测点加总
-
-                    Object temp_value1=l.get("SiteName");
-                    sitename=(temp_value1.toString());
-                    int stop_point=sitename.indexOf('-');  //截取数字
-                    String num=sitename.substring(1,stop_point);
-                    num0= new Integer(num);
-                }
-                server_site2.put(num0,datavalueStr);//将该测点的名字与数值生成键值对 （A01-下，22.5）=》》（1，22.5）
-//                list_data.addAll(list1);
-//                list_data.addAll(list2);
-//                data.put(sql_temp1,Arrays.asList(c,i));  //debugs
-
-
-
-
-                for (Map<String,Object> l:list3){//热测点取值所有测点
-
-                    Object temp_value=l.get("Value0");
-                    Double datavalue=Double.parseDouble(temp_value.toString());
-                    datavalueStr = String.format("%.2f", datavalue);
-                    if (Double.parseDouble(datavalueStr)==0.0){ cntNull3=cntNull3+1;}
-
-                    temperature3+=Double.parseDouble(datavalueStr);//A所有热通道求和求平均
-//                    list_datavalue.add(Double.valueOf(datavalueStr));
-                    Object temp_name1=l.get("SiteName");
-                    sitename=(temp_name1.toString());
-//                    int stop_point=sitename.indexOf('-');  //截取数字省略，本身sitename为数值
-//                    String num=sitename.substring(1,stop_point);
-                    num0= new Integer(sitename);
-                }
-//                server_site1_avg.put("Atop",temperature_all/siteNum)
-                server_site3.put(num0,datavalueStr);//将该测点的名字与数值生成键值对 （01，22.5）=》》（1，22.5）
-
-
-            }
-            temperature2=temperature2/(siteNum-cntNull1);//某列服务冷通道上测点的总和除非0测点的个数，为某列服务器冷通道上测点平均
-            temperature1=temperature1/(siteNum-cntNull2);//某列服务冷通道下测点的总和除非0测点的个数，为某列服务器冷通道下测点平均
-            temperature3=temperature3/(siteNum-cntNull3);//某列服务热通道测点的总和除非0测点的个数，为某列服务器热通道测点平均
-
-            String t1 = String.format("%.2f", temperature1);
-            String t2 = String.format("%.2f", temperature2);
-            String t3 = String.format("%.2f", temperature3); // 保留两位小数
-
-
-            Map<String, Object> site_avg = new TreeMap<>();//某服务器冷通道平均
-            Map<String, Object> site_avg1 = new TreeMap<>();//热通道平均
-            Map<String, Object> site_name = new TreeMap<>(); //冷通道
-            Map<String, Object> site_name1 = new TreeMap<>();//热通道
-            Map<String, Object> site_name2 = new TreeMap<>();//功率
-            TreeMap<String, Object> server_site0 = new TreeMap<>(server_site);
-            TreeMap<Integer, Object> server_site11 = new TreeMap<>(server_site1);//冷通道上 排序
-            TreeMap<Integer, Object> server_site22 = new TreeMap<>(server_site2); //冷通道下 排序
-            TreeMap<Integer, Object> server_site33 = new TreeMap<>(server_site3);//热通道 排序
-//            TreeMap<String, Object> server_site11_avg = new TreeMap<>(server_site1_avg);
-//            TreeMap<String, Object> server_site22_avg = new TreeMap<>(server_site2_avg);  //测点排序
-
-            site_avg.put("upall",t1);//冷通道上，（upall，某列冷上平均）
-            site_avg.put("downall",t2);//冷通道下 （downall，某列冷下平均）
-            site_avg1.put("all",t3); ////热通道  （all，某列热平均）
-
-            server_site0.put("up",server_site11); //某列服务器所有上测点  （up，{服务器所有测点（1，22）（2，22）..}）
-            server_site0.put("down",server_site22);//某列服务器所有下测点  （down，{服务器所有测点（1，22）（2，22）..}）
-
-            site_name.put("avg",site_avg);  // (avg, {（upall，某列冷上平均）,（downall，某列冷下平均）})
-            site_name.put("sitedetail",server_site0);//(sitedetail,{（up，{服务器所有测点（1，22）（2，22）..}）,（down，{服务器所有测点（1，22）（2，22）..}）})
-
-            //热通道
-            site_name1.put("sitedetail",server_site33); //(sitedetail,{服务器所有测点（1，22）（2，22）..})
-            site_name1.put("avg",site_avg1); //(avg,（all，某列热平均）)
-
-
-            server_temp.put(c,site_name); //冷通道（A，{(avg,xx),(sitedetail,xx)}）
-            server_temp1.put(c,site_name1); //热通道（A，{}）
-//            break;
-//            server_num+=1;
-//            data.put(sql_temp1,c);
-        }
-//        String sql_temp1=sql1.replace("'服务器'","'服务器"+"B'");  //字符串里有双引号
-//        sql_temp1=sql_temp1.replace("'X1","'B"+server_num.toString());   //字符串里有双引号的左半边
-//        list1=jdbc.queryForList(sql_temp1);
-//        System.out.print(sql_temp1);
-//        list_data.add(data);
-//        data.put("datavalue",list_datavalue);
-//        data.put("sitename",list_name);
-        String sql_p="select * from realdata_once where Location='JF202' and PointName='服务器功率' ";
-        List <Map<String,Object>> list_p=jdbc.queryForList(sql_p);
-        List <Map<String,Object>>temp_p= new ArrayList<>();
-        TreeMap<String,Object> temp= new TreeMap<>();
-        for(Map<String,Object> p:list_p){
-            Object p_name=p.get("Equipment");
-            Object p_value=p.get("Value0");
-            temp.put(p_name.toString().substring(3),p_value);
-            temp_p.add(temp);
-        }
-//        server_temp2=temp_p;
-        data.put("servercold",server_temp);
-        data.put("serverhot",server_temp1);
-        data.put("serverpower",temp);
-
-        list_data.add(data);
-        return list_data;
-    }
-
-
-    @CrossOrigin
     @RequestMapping("/getData/202/realdata/servernew")
     @ResponseBody
 //    @Scheduled(fixedRate = 30000)
@@ -401,7 +190,7 @@ public class realdata_202_controller {
         List<String> server = Arrays.asList("A","B","C","D","E","F","G","H","J","K","L","M","N","P");
         String sql="select Value0 from realdata_once where Location='JF202' and Equipment='服务器A' and SiteName='A1-上' limit 0,1";
 
-        String sql1="select * from realdata_once where Location='JF202' and Equipment='服务器'";
+        String sql1="select * from realdata_once where Location='JF202' and Equipment='服务器'  limit 0,70";
 
         Map<String, Object> servers_cold= new TreeMap<>();  //所有列列服务器冷通道
         Map<String, Object> servers_hot= new TreeMap<>();  //某列服务器冷通道
@@ -594,7 +383,7 @@ public class realdata_202_controller {
         List<String> server = Arrays.asList("A","B","C","D","E","F","G","H","J","K","L","M","N","P");
         String sql="select Value0 from realdata_once where Location='JF202' and Equipment='服务器A' and SiteName='A1-上' limit 0,1";
 
-        String sql1="select * from realdata_once where Location='JF202' and Equipment='服务器'";
+        String sql1="select * from realdata_once where Location='JF202' and Equipment='服务器' limit 0,70";
 
         Map<String, Object> servers_cold= new TreeMap<>();  //所有列列服务器冷通道
         Map<String, Object> servers_hot= new TreeMap<>();  //某列服务器冷通道
@@ -724,7 +513,7 @@ public class realdata_202_controller {
 
         //        kt2
         List <Map<String,Object>> list_all= new ArrayList<>();
-        String sql20_sf=" select PointName,Equipment,Value0 from realdata_once where Location='JF202' and Equipment='空调0'";  //从表中筛选某空调的所有参数
+        String sql20_sf=" select PointName,Equipment,Value0 from realdata_once where Location='JF202' and Equipment='空调0' limit 0,16";  //从表中筛选某空调的所有参数
         List <Map<String,Object>> list_temp= new ArrayList<>();
         Map<String,Object> a = new HashMap<>();
         Map<Integer,Object> kt_all = new HashMap<>();
@@ -769,7 +558,7 @@ public class realdata_202_controller {
         //        kt2
         List <Map<String,Object>> list_all= new ArrayList<>();
         List<String> server = Arrays.asList("A","B","C","D","E","F","G","H","J","K","L","M","N","P");
-        String sql20_sf=" select PointName,Equipment,Value0,SiteName from realdata_once where Location='JF202' and Equipment='服务器'";  //从表中筛选某空调的所有参数
+        String sql20_sf=" select PointName,Equipment,Value0,SiteName from realdata_once where Location='JF202' and Equipment='服务器' limit 0,70";  //从表中筛选某空调的所有参数
         List <Map<String,Object>> list_temp= new ArrayList<>();
         Map<String,Object> a = new HashMap<>();
         Map<Integer,Object> kt_all = new HashMap<>();
@@ -818,7 +607,7 @@ public class realdata_202_controller {
         List <Map<String,Object>> list_data= new ArrayList<>();  //储存返回的json
         List<String> server = Arrays.asList("A","B","C","D","E","F","G","H","J","K","L","M","N","P");
         Collections.reverse(server);//从P开始排序
-        String sql1="select * from realdata_once where Location='JF202' and Equipment='服务器'";
+        String sql1="select * from realdata_once where Location='JF202' and Equipment='服务器' limit 0,70";
 
         List <sitecold> list_sitecold= sitecoldmapper.selectList(null);
 //        String sql=" select * from realdata_once where Location='JF202' and PointName='冷通道温度' ";
@@ -826,6 +615,7 @@ public class realdata_202_controller {
 
 
         Iterator<sitecold> cold_before_all = list_sitecold.iterator();
+
 //        Iterator<Map<String,Object>> cold_all = cold_temp_all.iterator();
 //        cold_list.clear();
         Map<String, Object> servers_cold= new TreeMap<>();  //所有列列服务器冷通道
@@ -844,13 +634,13 @@ public class realdata_202_controller {
 
             for (Map<String, Object> l : list1) {//遍历每个服务器的测点
 
-                if(cnt_change_site==siteNum*2){
+                if(cnt_change_site>=siteNum*2){
                     break;
                 }
                 String SiteName= l.get("SiteName").toString();
                 Double value0 = (double) l.get("Value0");
 //                Double value_before= Double.parseDouble(cold_all_show.get(SiteName).toString());
-                Double value_before=cold_before_all.next().getGapValue();
+                Double value_before=cold_before_all.next().getGapValue(); //下一个测点的值
                 if (cnt_change_site < siteNum * 2) {
 
                     if (cnt_change_site % 2 != 0) {//奇数下测点
@@ -884,7 +674,6 @@ public class realdata_202_controller {
         }
         list_data.add(servers_cold);
 
-
         return list_data;
     }
 
@@ -914,12 +703,12 @@ public class realdata_202_controller {
     @CrossOrigin
     @PostMapping("/getData/202/realdata/alert_design")
     @ResponseBody
-    public String alert_design(@RequestBody List<Boolean>data ){
+    public List<Boolean> alert_design(@RequestBody List<Boolean>data ){
 //        List<Double> ret=new ArrayList<>();
         real_alert=data.get(0);
         pre_alert=data.get(1);
         coldsite_alert=data.get(2);
-        return "receive the alert design params";
+        return data;
     }
 
     @CrossOrigin
@@ -940,7 +729,7 @@ public class realdata_202_controller {
     public Map<String,Object> alert2(){
 
         Map<String,Object> b= new HashMap<>();
-        List<List<String>> now= new ArrayList<>();
+        List<List<String>> real= new ArrayList<>();
         List<List<String>> pre= new ArrayList<>();
         List<List<String>> cold_list= new ArrayList<>();
         List <sitecold> list_sitecold= sitecoldmapper.selectList(null);
@@ -949,15 +738,23 @@ public class realdata_202_controller {
 //        find_list.allEq(null);
 
         String sql2="select * from predata where PointName='冷通道最大温度' ORDER BY id DESC limit 0,7"; //预测警告
+        String sql3="select * from preshow where PointName='冷通道最大温度' ORDER BY id DESC limit 0,7"; //实时警告
 
         List <Map<String,Object>> list2=jdbc.queryForList(sql2);
         for (Map<String,Object> m:list2){
             if(Double.parseDouble(m.get("Value0").toString())>= (double)cold_range.get(1)){
-                pre.add(Arrays.asList(m.get("time").toString(),m.get("Equipment").toString().substring(3),m.get("PointName").toString()+"为"+m.get("Value0")+"°C"));
+                pre.add(Arrays.asList(m.get("time").toString(),m.get("Equipment").toString().substring(3),m.get("PointName").toString()+"为"+String.format("%.2f",m.get("Value0"))+"°C"));
             }
         }
 
-        String sql=" select * from realdata_once where Location='JF202' and PointName='冷通道温度' ";
+        List <Map<String,Object>> list3=jdbc.queryForList(sql3);
+        for (Map<String,Object> m:list3){
+            if(Double.parseDouble(m.get("Value0").toString())>= (double)cold_range.get(1)){
+                real.add(Arrays.asList(m.get("time").toString(),m.get("Equipment").toString().substring(3),m.get("PointName").toString()+"为"+String.format("%.2f",m.get("Value0"))+"°C"));
+            }
+        }
+
+        String sql=" select * from realdata_once where Location='JF202' and PointName='冷通道温度' limit 0,644";
         List <Map<String,Object>> cold_temp_all=jdbc.queryForList(sql);
 
 
@@ -974,10 +771,10 @@ public class realdata_202_controller {
 //            Double value_before=Double.parseDouble(cuc.cold_all_show.get(SiteName).toString());
             Double value_before=(double) cold_before.getGapValue();
             if(Math.abs(value0-value_before)>fixed_range){
-                cold_list.add(Arrays.asList(id.toString(),cold.get("time").toString(),cold.get("Equipment").toString().substring(3),cold.get("SiteName").toString()+"波动"+String.format("%.2f",Math.abs(value0-value_before))+"度"));
+//                cold_list.add(Arrays.asList(id.toString(),cold.get("time").toString(),cold.get("Equipment").toString().substring(3),cold.get("SiteName").toString()+"波动"+String.format("%.2f",Math.abs(value0-value_before))+"度"));
                 cold_list.add(Arrays.asList(id.toString(),cold.get("time").toString(),cold.get("Equipment").toString().substring(3),cold.get("SiteName").toString()+"波动"+String.format("%.2f",Math.abs(value0-value_before))+"度"));
                 alert alert0 = new alert();
-                alert0.setContent(cold.get("SiteName").toString()+"波动"+Math.abs(value0-value_before)+"度");
+                alert0.setContent(cold.get("SiteName").toString()+"波动"+String.format("%.2f",Math.abs(value0-value_before))+"度");
                 alert0.setEquipment(cold.get("Equipment").toString().substring(3));
                 alert0.setLocation("FT202");
                 alert0.setSampleTime(cold.get("time").toString());
@@ -988,7 +785,7 @@ public class realdata_202_controller {
 
         List<List<String>> temp= new ArrayList<>();
         if(real_alert==true){//实时报警
-            b.put("real_hot",temp);
+            b.put("real_hot",real);
         }else{
             b.put("real_hot",temp);
         }
@@ -1006,16 +803,38 @@ public class realdata_202_controller {
 
         }
 
+
+        String sql_data_alert="select * from data_alert ORDER BY id DESC limit 0,1"; //实时警告
+
+        List <Map<String,Object>> list_data_alert=jdbc.queryForList(sql2);
+        Integer data_alert=0;
+        for(Map<String,Object> i:list_data_alert){
+            data_alert=(Integer)i.get("Value0");
+        }
+        b.put("data_alert",data_alert);
         return b;
     }
 
-
+//
     @CrossOrigin
     @RequestMapping("/getData/202/alert_history")
     @ResponseBody
     public List<alert> alert_history(){
         LambdaQueryWrapper<alert> andWrapper = new LambdaQueryWrapper<>();
         andWrapper.last("limit 1000");
+        List <alert> list =alertservice.list(andWrapper);
+//        return new HashMap<>();
+        return list;
+    }
+
+    @CrossOrigin
+    @PostMapping("/getData/202/alert_history")
+    @ResponseBody
+    public List<alert> alert_history(@RequestBody List<String> data){
+        String start_time=data.get(0);
+        String end_time=data.get(1);
+        LambdaQueryWrapper<alert> andWrapper = new LambdaQueryWrapper<>();
+        andWrapper.ge(alert::getSampleTime,start_time).lt(alert::getSampleTime,end_time);
         List <alert> list =alertservice.list(andWrapper);
 //        return new HashMap<>();
         return list;

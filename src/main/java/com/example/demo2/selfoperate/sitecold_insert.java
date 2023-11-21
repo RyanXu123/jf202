@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -25,10 +26,10 @@ public class sitecold_insert implements ApplicationRunner {
 
     @Autowired
     sitecoldMapper sitecoldmapper;
-
+    Integer cnt=0;
     @Override
     public  void run(ApplicationArguments args) throws Exception{
-        Integer cnt=0;
+
         while(true){
 //            System.out.println("test");
             List<sitecold> list_site_cold= new ArrayList<>();
@@ -45,9 +46,10 @@ public class sitecold_insert implements ApplicationRunner {
                     sc.setLocation("JF202");
                     sc.setPointName(c.get("SiteName").toString());
                     sc.setGapValue(Double.parseDouble(c.get("Value0").toString()));
-//                sitecoldservice.updateBatchById(sc);
+//                    System.out.println(sc);
+                    sitecoldservice.save(sc);
                 }
-                cnt+=1;
+                cnt=1;
             }else{
 
                 for(Map<String,Object> c :cold_temp_all ){//更新上一时刻测点温度
@@ -55,6 +57,7 @@ public class sitecold_insert implements ApplicationRunner {
                     updatawrapper.eq("PointName",c.get("SiteName").toString()).set("GapValue",Double.parseDouble(c.get("Value0").toString()));//更新,就不会出现空的情况
                     sitecoldmapper.update(null,updatawrapper);
                 }
+//                cnt=0;
             }
             Thread.sleep(60000);
         }

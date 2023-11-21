@@ -60,7 +60,7 @@ public class riskdata_202_controller {
                 Double value0 = (double) l.get("Value0");
                 if (cnt < siteNum * 2) {
                     if (cnt % 2 != 0) {//奇数下测点
-                        String s= String.format("%.2f", Math.pow((value0-17)/(26.8-17) ,3));
+                        String s= String.format("%.2f", Math.pow((value0-17)/(26.8-17) ,3)*100);
                         double d =Double.parseDouble(s);
                         if(value0<26.8){
                             d =Double.parseDouble(s);
@@ -75,7 +75,7 @@ public class riskdata_202_controller {
 
                         server_site_cold_down.add(d);         //正常0
                     } else {
-                        String s= String.format("%.2f", Math.pow((value0-17)/(26.8-17) ,3)); //变量区分大，但计算变慢
+                        String s= String.format("%.2f", Math.pow((value0-17)/(26.8-17) ,3)*100); //变量区分大，但计算变慢
                         double d =Double.parseDouble(s);
 
                         if(value0<26.8){

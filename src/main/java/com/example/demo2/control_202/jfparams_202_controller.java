@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-public class aipreparams_202_controller {
+public class jfparams_202_controller {
     @Autowired
     private JdbcTemplate jdbc;
 

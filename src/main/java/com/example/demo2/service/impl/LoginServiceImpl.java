@@ -28,7 +28,7 @@ public class LoginServiceImpl implements LoginService {
         }
         //通过登录名查询用户
         QueryWrapper<User> wrapper = new QueryWrapper();
-        wrapper.eq("UserName", loginDto.getLoginName());
+        wrapper.eq("UserName",loginDto.getLoginName()).eq("Role", loginDto.getRole());
         User uer=userMapper.selectOne(wrapper);
         //比较密码
         if (uer!=null&&uer.getPassword().equals(loginDto.getPassword())){
@@ -36,6 +36,7 @@ public class LoginServiceImpl implements LoginService {
             loginVO.setId(uer.getId());
             //这里token直接用一个uuid
             //使用jwt的情况下，会生成一个jwt token,jwt token里会包含用户的信息
+            uer.setPassword("******");
             loginVO.setToken(UUID.randomUUID().toString());
             loginVO.setUser(uer);
             return new ResultMassage(200,"",loginVO);

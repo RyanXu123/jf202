@@ -11,4 +11,5 @@ public class sitecold {
     private String Location;
     private String PointName;
     private Double GapValue;
+//    private Double NOUSE;
 }
