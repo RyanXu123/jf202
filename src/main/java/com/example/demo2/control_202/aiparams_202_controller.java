@@ -120,8 +120,8 @@ public Map<String,Object> aiparams(){
 
     String openAi="0";
     String restart="0";
-    //    private String userName = "user123"; // 默认用户名
-//    private String userRole = "admin";   //默认用户权限
+   // private String userName = "user123"; // 默认用户名
+    //private String userRole = "admin";   //默认用户权限
     private String aiopenlogTime; //AI打开时设置
     @CrossOrigin
     @RequestMapping("/getData/202/aicontrol")

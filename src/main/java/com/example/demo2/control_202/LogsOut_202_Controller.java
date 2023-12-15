@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-public class LogsOut_201_Controller {
+public class LogsOut_202_Controller {
     @Autowired
     private JdbcTemplate jdbc;
 

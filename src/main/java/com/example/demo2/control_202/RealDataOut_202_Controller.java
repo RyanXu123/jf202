@@ -12,7 +12,7 @@ public class RealDataOut_202_Controller {
     @Autowired
     private JdbcTemplate jdbc;
     @CrossOrigin
-    @RequestMapping("/getData/202/realdata/out1")
+    @RequestMapping("/getData/202/realdata/out")
     @ResponseBody
     public List<Map<String,Object>> dataout(@RequestBody List<String> data) {
         //        kt2
